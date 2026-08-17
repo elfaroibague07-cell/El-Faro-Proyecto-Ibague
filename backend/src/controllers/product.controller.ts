@@ -4,6 +4,7 @@ import {
   getProducts,
   createProduct,
   getProductById,
+  updateProduct,
   deleteProduct
 } from '../services/product.service'
 
@@ -160,6 +161,186 @@ export async function createProductController(
     return res.status(500).json({
       success: false,
       message: 'Error al crear el producto'
+    })
+  }
+}
+
+/* =========================================
+   PUT - ACTUALIZAR PRODUCTO
+========================================= */
+
+export async function updateProductController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { id } = req.params
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'El ID del producto es obligatorio'
+      })
+    }
+
+    /* =======================================
+       BUSCAR PRODUCTO ACTUAL
+    ======================================= */
+
+    const currentProduct =
+      await getProductById(id)
+
+    if (!currentProduct) {
+      return res.status(404).json({
+        success: false,
+        message: 'Producto no encontrado'
+      })
+    }
+
+    const {
+      name,
+      slug,
+      description,
+      price,
+      long_description,
+      material,
+      size,
+      category_id,
+      featured,
+      active
+    } = req.body
+
+    /* =======================================
+       VALIDACIONES
+    ======================================= */
+
+    if (!name || !slug || !description || !price) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'name, slug, description y price son obligatorios'
+      })
+    }
+
+    const numericPrice = Number(price)
+
+    if (
+      !Number.isFinite(numericPrice) ||
+      numericPrice <= 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'El precio debe ser un número mayor que 0'
+      })
+    }
+
+    /* =======================================
+       DATOS A ACTUALIZAR
+    ======================================= */
+
+    let imageUrl = currentProduct.image_url
+    let imagePublicId =
+      currentProduct.image_public_id
+
+    let newImageUploaded = false
+
+    /* =======================================
+       NUEVA IMAGEN
+    ======================================= */
+
+    if (req.file) {
+      const uploadedImage =
+        await uploadImage(req.file.buffer)
+
+      imageUrl = uploadedImage.url
+      imagePublicId =
+        uploadedImage.publicId
+
+      newImageUploaded = true
+    }
+
+    /* =======================================
+       ACTUALIZAR SUPABASE
+    ======================================= */
+
+    const product =
+      await updateProduct(id, {
+        name: String(name).trim(),
+
+        slug: String(slug).trim(),
+
+        description:
+          String(description).trim(),
+
+        price: numericPrice,
+
+        long_description:
+          long_description
+            ? String(long_description).trim()
+            : null,
+
+        material:
+          material
+            ? String(material).trim()
+            : null,
+
+        size:
+          size
+            ? String(size).trim()
+            : null,
+
+        category_id:
+          category_id
+            ? String(category_id)
+            : null,
+
+        featured:
+          featured === 'true' ||
+          featured === true,
+
+        active:
+          active === undefined
+            ? currentProduct.active
+            : active === 'true' ||
+              active === true,
+
+        image_url: imageUrl,
+
+        image_public_id:
+          imagePublicId
+      })
+
+    /* =======================================
+       ELIMINAR IMAGEN ANTERIOR
+       SOLO DESPUÉS DE ACTUALIZAR
+    ======================================= */
+
+    if (
+      newImageUploaded &&
+      currentProduct.image_public_id
+    ) {
+      await deleteImage(
+        currentProduct.image_public_id
+      )
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Producto actualizado correctamente',
+      data: product
+    })
+  } catch (error) {
+    console.error(
+      'Update product error:',
+      error
+    )
+
+    return res.status(500).json({
+      success: false,
+      message:
+        'Error al actualizar el producto'
     })
   }
 }

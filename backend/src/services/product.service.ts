@@ -10,12 +10,13 @@ export interface CreateProductData {
   size?: string | null
   category_id?: string | null
   featured?: boolean
+  active?: boolean
   image_url?: string | null
   image_public_id?: string | null
 }
 
 /* =========================================
-   GET - OBTENER PRODUCTOS
+   GET ALL PRODUCTS
 ========================================= */
 
 export async function getProducts() {
@@ -35,7 +36,31 @@ export async function getProducts() {
 }
 
 /* =========================================
-   POST - CREAR PRODUCTO
+   GET PRODUCT BY ID
+========================================= */
+
+export async function getProductById(
+  id: string
+) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null
+    }
+
+    throw error
+  }
+
+  return data
+}
+
+/* =========================================
+   CREATE PRODUCT
 ========================================= */
 
 export async function createProduct(
@@ -55,35 +80,16 @@ export async function createProduct(
 }
 
 /* =========================================
-   GET - OBTENER PRODUCTO POR ID
+   UPDATE PRODUCT
 ========================================= */
 
-export async function getProductById(
-  id: string
+export async function updateProduct(
+  id: string,
+  product: Partial<CreateProductData>
 ) {
   const { data, error } = await supabase
     .from('products')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle()
-
-  if (error) {
-    throw error
-  }
-
-  return data
-}
-
-/* =========================================
-   DELETE - ELIMINAR PRODUCTO
-========================================= */
-
-export async function deleteProduct(
-  id: string
-) {
-  const { data, error } = await supabase
-    .from('products')
-    .delete()
+    .update(product)
     .eq('id', id)
     .select()
     .single()
@@ -93,4 +99,21 @@ export async function deleteProduct(
   }
 
   return data
+}
+
+/* =========================================
+   DELETE PRODUCT
+========================================= */
+
+export async function deleteProduct(
+  id: string
+) {
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw error
+  }
 }
