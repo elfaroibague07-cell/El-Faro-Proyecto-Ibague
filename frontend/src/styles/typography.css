@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lato:wght@300;400;500;600;700&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Lato", "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-weight: 400;
+  color: var(--white);
+}
+
+p {
+  font-family: "Lato", "Segoe UI", Arial, sans-serif;
+  color: var(--gray);
+}
+
+strong {
+  font-family: "Lato", "Segoe UI", Arial, sans-serif;
+  color: var(--white);
+  font-weight: 700;
+}
