@@ -14,6 +14,10 @@ export interface CreateProductData {
   image_public_id?: string | null
 }
 
+/* =========================================
+   GET - OBTENER PRODUCTOS
+========================================= */
+
 export async function getProducts() {
   const { data, error } = await supabase
     .from('products')
@@ -30,12 +34,57 @@ export async function getProducts() {
   return data
 }
 
+/* =========================================
+   POST - CREAR PRODUCTO
+========================================= */
+
 export async function createProduct(
   product: CreateProductData
 ) {
   const { data, error } = await supabase
     .from('products')
     .insert(product)
+    .select()
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+/* =========================================
+   GET - OBTENER PRODUCTO POR ID
+========================================= */
+
+export async function getProductById(
+  id: string
+) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+/* =========================================
+   DELETE - ELIMINAR PRODUCTO
+========================================= */
+
+export async function deleteProduct(
+  id: string
+) {
+  const { data, error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
     .select()
     .single()
 

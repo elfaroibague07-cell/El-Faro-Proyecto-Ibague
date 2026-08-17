@@ -2,12 +2,19 @@ import type { Request, Response } from 'express'
 
 import {
   getProducts,
-  createProduct
+  createProduct,
+  getProductById,
+  deleteProduct
 } from '../services/product.service'
 
 import {
-  uploadImage
+  uploadImage,
+  deleteImage
 } from '../services/cloudinary.service'
+
+/* =========================================
+   GET - OBTENER PRODUCTOS
+========================================= */
 
 export async function getProductsController(
   req: Request,
@@ -21,10 +28,7 @@ export async function getProductsController(
       data: products
     })
   } catch (error) {
-    console.error(
-      'Get products error:',
-      error
-    )
+    console.error('Get products error:', error)
 
     return res.status(500).json({
       success: false,
@@ -32,6 +36,10 @@ export async function getProductsController(
     })
   }
 }
+
+/* =========================================
+   POST - CREAR PRODUCTO
+========================================= */
 
 export async function createProductController(
   req: Request,
@@ -50,11 +58,16 @@ export async function createProductController(
       featured
     } = req.body
 
-    /* ================================
+    /* =======================================
        VALIDACIONES
-    ================================= */
+    ======================================= */
 
-    if (!name || !slug || !description || !price) {
+    if (
+      !name ||
+      !slug ||
+      !description ||
+      !price
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -77,21 +90,22 @@ export async function createProductController(
     ) {
       return res.status(400).json({
         success: false,
-        message: 'El precio debe ser un número mayor que 0'
+        message:
+          'El precio debe ser un número mayor que 0'
       })
     }
 
-    /* ================================
+    /* =======================================
        CLOUDINARY
-    ================================= */
+    ======================================= */
 
     const uploadedImage = await uploadImage(
       req.file.buffer
     )
 
-    /* ================================
+    /* =======================================
        SUPABASE
-    ================================= */
+    ======================================= */
 
     const product = await createProduct({
       name: String(name).trim(),
@@ -146,6 +160,81 @@ export async function createProductController(
     return res.status(500).json({
       success: false,
       message: 'Error al crear el producto'
+    })
+  }
+}
+
+/* =========================================
+   DELETE - ELIMINAR PRODUCTO
+========================================= */
+
+export async function deleteProductController(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { id } = req.params
+
+    /* =======================================
+       VALIDAR ID
+    ======================================= */
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'El ID del producto es obligatorio'
+      })
+    }
+
+    /* =======================================
+       BUSCAR PRODUCTO
+    ======================================= */
+
+    const product = await getProductById(id)
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Producto no encontrado'
+      })
+    }
+
+    /* =======================================
+       ELIMINAR IMAGEN DE CLOUDINARY
+    ======================================= */
+
+    if (product.image_public_id) {
+      await deleteImage(
+        product.image_public_id
+      )
+    }
+
+    /* =======================================
+       ELIMINAR PRODUCTO DE SUPABASE
+    ======================================= */
+
+    await deleteProduct(id)
+
+    /* =======================================
+       RESPUESTA
+    ======================================= */
+
+    return res.status(200).json({
+      success: true,
+      message:
+        'Producto eliminado correctamente'
+    })
+  } catch (error) {
+    console.error(
+      'Delete product error:',
+      error
+    )
+
+    return res.status(500).json({
+      success: false,
+      message:
+        'Error al eliminar el producto'
     })
   }
 }
