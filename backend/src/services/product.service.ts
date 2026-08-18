@@ -60,6 +60,26 @@ export async function getProductById(
 }
 
 /* =========================================
+   GET PRODUCT BY SLUG
+========================================= */
+
+export async function getProductBySlug(
+  slug: string
+) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, slug')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+/* =========================================
    CREATE PRODUCT
 ========================================= */
 

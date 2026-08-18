@@ -4,6 +4,7 @@ import {
   getProducts,
   createProduct,
   getProductById,
+  getProductBySlug,
   updateProduct,
   deleteProduct
 } from '../services/product.service'
@@ -59,7 +60,16 @@ export async function createProductController(
       featured
     } = req.body
 
-    if (!name || !slug || !description || !price) {
+    /* =======================================
+       VALIDACIONES BÁSICAS
+    ======================================= */
+
+    if (
+      !name ||
+      !slug ||
+      !description ||
+      !price
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -67,12 +77,41 @@ export async function createProductController(
       })
     }
 
+    const cleanSlug = String(slug).trim()
+
+    /* =======================================
+       VALIDAR SLUG DUPLICADO
+    ======================================= */
+
+    const existingProduct =
+      await getProductBySlug(cleanSlug)
+
+    if (existingProduct) {
+      return res.status(409).json({
+        success: false,
+        message:
+          'Ya existe un producto con ese slug',
+        data: {
+          id: existingProduct.id,
+          slug: existingProduct.slug
+        }
+      })
+    }
+
+    /* =======================================
+       VALIDAR IMAGEN
+    ======================================= */
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
         message: 'La imagen es obligatoria'
       })
     }
+
+    /* =======================================
+       VALIDAR PRECIO
+    ======================================= */
 
     const numericPrice = Number(price)
 
@@ -87,47 +126,91 @@ export async function createProductController(
       })
     }
 
+    /* =======================================
+       SUBIR IMAGEN A CLOUDINARY
+    ======================================= */
+
     const uploadedImage = await uploadImage(
       req.file.buffer
     )
 
-    const product = await createProduct({
-      name: String(name).trim(),
-      slug: String(slug).trim(),
-      description: String(description).trim(),
-      price: numericPrice,
+    /* =======================================
+       CREAR PRODUCTO EN SUPABASE
+    ======================================= */
 
-      long_description:
-        long_description
-          ? String(long_description).trim()
-          : null,
+    let product
 
-      material:
-        material
-          ? String(material).trim()
-          : null,
+    try {
+      product = await createProduct({
+        name: String(name).trim(),
 
-      size:
-        size
-          ? String(size).trim()
-          : null,
+        slug: cleanSlug,
 
-      category_id:
-        category_id
-          ? String(category_id)
-          : null,
+        description:
+          String(description).trim(),
 
-      featured:
-        featured === 'true' ||
-        featured === true,
+        price: numericPrice,
 
-      image_url: uploadedImage.url,
-      image_public_id: uploadedImage.publicId
-    })
+        long_description:
+          long_description
+            ? String(long_description).trim()
+            : null,
+
+        material:
+          material
+            ? String(material).trim()
+            : null,
+
+        size:
+          size
+            ? String(size).trim()
+            : null,
+
+        category_id:
+          category_id
+            ? String(category_id)
+            : null,
+
+        featured:
+          featured === 'true' ||
+          featured === true,
+
+        image_url:
+          uploadedImage.url,
+
+        image_public_id:
+          uploadedImage.publicId
+      })
+    } catch (error) {
+      /* =====================================
+         ROLLBACK CLOUDINARY
+
+         Si Supabase falla después de subir
+         la imagen, eliminamos la imagen.
+      ===================================== */
+
+      try {
+        await deleteImage(
+          uploadedImage.publicId
+        )
+      } catch (rollbackError) {
+        console.error(
+          'Error eliminando imagen de rollback:',
+          rollbackError
+        )
+      }
+
+      throw error
+    }
+
+    /* =======================================
+       RESPUESTA
+    ======================================= */
 
     return res.status(201).json({
       success: true,
-      message: 'Producto creado correctamente',
+      message:
+        'Producto creado correctamente',
       data: product
     })
   } catch (error) {
@@ -138,7 +221,8 @@ export async function createProductController(
 
     return res.status(500).json({
       success: false,
-      message: 'Error al crear el producto'
+      message:
+        'Error al crear el producto'
     })
   }
 }
