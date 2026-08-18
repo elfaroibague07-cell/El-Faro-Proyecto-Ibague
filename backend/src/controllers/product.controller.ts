@@ -59,16 +59,7 @@ export async function createProductController(
       featured
     } = req.body
 
-    /* =======================================
-       VALIDACIONES
-    ======================================= */
-
-    if (
-      !name ||
-      !slug ||
-      !description ||
-      !price
-    ) {
+    if (!name || !slug || !description || !price) {
       return res.status(400).json({
         success: false,
         message:
@@ -96,25 +87,14 @@ export async function createProductController(
       })
     }
 
-    /* =======================================
-       CLOUDINARY
-    ======================================= */
-
     const uploadedImage = await uploadImage(
       req.file.buffer
     )
 
-    /* =======================================
-       SUPABASE
-    ======================================= */
-
     const product = await createProduct({
       name: String(name).trim(),
-
       slug: String(slug).trim(),
-
       description: String(description).trim(),
-
       price: numericPrice,
 
       long_description:
@@ -142,9 +122,7 @@ export async function createProductController(
         featured === true,
 
       image_url: uploadedImage.url,
-
-      image_public_id:
-        uploadedImage.publicId
+      image_public_id: uploadedImage.publicId
     })
 
     return res.status(201).json({
@@ -173,13 +151,16 @@ export async function updateProductController(
   req: Request,
   res: Response
 ) {
+  let uploadedNewImageId: string | null = null
+
   try {
     const { id } = req.params
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: 'El ID del producto es obligatorio'
+        message:
+          'El ID del producto es obligatorio'
       })
     }
 
@@ -214,7 +195,12 @@ export async function updateProductController(
        VALIDACIONES
     ======================================= */
 
-    if (!name || !slug || !description || !price) {
+    if (
+      !name ||
+      !slug ||
+      !description ||
+      !price
+    ) {
       return res.status(400).json({
         success: false,
         message:
@@ -236,36 +222,42 @@ export async function updateProductController(
     }
 
     /* =======================================
-       DATOS A ACTUALIZAR
+       MANTENER IMAGEN ACTUAL
     ======================================= */
 
-    let imageUrl = currentProduct.image_url
+    let imageUrl =
+      currentProduct.image_url
+
     let imagePublicId =
       currentProduct.image_public_id
 
-    let newImageUploaded = false
-
     /* =======================================
-       NUEVA IMAGEN
+       SI VIENE NUEVA IMAGEN
     ======================================= */
 
     if (req.file) {
       const uploadedImage =
-        await uploadImage(req.file.buffer)
+        await uploadImage(
+          req.file.buffer
+        )
 
       imageUrl = uploadedImage.url
+
       imagePublicId =
         uploadedImage.publicId
 
-      newImageUploaded = true
+      uploadedNewImageId =
+        uploadedImage.publicId
     }
 
     /* =======================================
        ACTUALIZAR SUPABASE
     ======================================= */
 
-    const product =
-      await updateProduct(id, {
+    let product
+
+    try {
+      product = await updateProduct(id, {
         name: String(name).trim(),
 
         slug: String(slug).trim(),
@@ -310,19 +302,53 @@ export async function updateProductController(
         image_public_id:
           imagePublicId
       })
+    } catch (error) {
+      /* =====================================
+         ROLLBACK CLOUDINARY
+         Si Supabase falla después de subir
+         la nueva imagen, la eliminamos.
+      ===================================== */
+
+      if (uploadedNewImageId) {
+        try {
+          await deleteImage(
+            uploadedNewImageId
+          )
+        } catch (rollbackError) {
+          console.error(
+            'Error eliminando imagen de rollback:',
+            rollbackError
+          )
+        }
+      }
+
+      throw error
+    }
 
     /* =======================================
        ELIMINAR IMAGEN ANTERIOR
-       SOLO DESPUÉS DE ACTUALIZAR
+       SOLO SI HABÍA UNA NUEVA
     ======================================= */
 
     if (
-      newImageUploaded &&
+      req.file &&
       currentProduct.image_public_id
     ) {
-      await deleteImage(
-        currentProduct.image_public_id
-      )
+      try {
+        await deleteImage(
+          currentProduct.image_public_id
+        )
+      } catch (imageError) {
+        /*
+         * El producto ya fue actualizado.
+         * No devolvemos 500 porque la operación
+         * principal sí terminó correctamente.
+         */
+        console.error(
+          'Error eliminando imagen anterior:',
+          imageError
+        )
+      }
     }
 
     return res.status(200).json({
@@ -356,10 +382,6 @@ export async function deleteProductController(
   try {
     const { id } = req.params
 
-    /* =======================================
-       VALIDAR ID
-    ======================================= */
-
     if (!id) {
       return res.status(400).json({
         success: false,
@@ -368,21 +390,19 @@ export async function deleteProductController(
       })
     }
 
-    /* =======================================
-       BUSCAR PRODUCTO
-    ======================================= */
-
-    const product = await getProductById(id)
+    const product =
+      await getProductById(id)
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message:
+          'Producto no encontrado'
       })
     }
 
     /* =======================================
-       ELIMINAR IMAGEN DE CLOUDINARY
+       ELIMINAR IMAGEN CLOUDINARY
     ======================================= */
 
     if (product.image_public_id) {
@@ -392,14 +412,10 @@ export async function deleteProductController(
     }
 
     /* =======================================
-       ELIMINAR PRODUCTO DE SUPABASE
+       ELIMINAR PRODUCTO SUPABASE
     ======================================= */
 
     await deleteProduct(id)
-
-    /* =======================================
-       RESPUESTA
-    ======================================= */
 
     return res.status(200).json({
       success: true,
