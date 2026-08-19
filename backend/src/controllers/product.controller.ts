@@ -304,6 +304,29 @@ export async function updateProductController(
           'El precio debe ser un número mayor que 0'
       })
     }
+    /* =======================================
+   VALIDAR SLUG DUPLICADO
+======================================= */
+
+      const cleanSlug = String(slug).trim()
+
+      const existingProduct =
+        await getProductBySlug(cleanSlug)
+
+      if (
+        existingProduct &&
+        existingProduct.id !== id
+      ) {
+        return res.status(409).json({
+          success: false,
+          message:
+            'Ya existe otro producto con ese slug',
+          data: {
+            id: existingProduct.id,
+            slug: existingProduct.slug
+          }
+        })
+      }
 
     /* =======================================
        MANTENER IMAGEN ACTUAL
@@ -344,7 +367,7 @@ export async function updateProductController(
       product = await updateProduct(id, {
         name: String(name).trim(),
 
-        slug: String(slug).trim(),
+        slug: cleanSlug,
 
         description:
           String(description).trim(),
