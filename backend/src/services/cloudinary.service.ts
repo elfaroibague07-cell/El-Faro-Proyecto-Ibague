@@ -1,4 +1,4 @@
-import cloudinary from '../config/cloudinary'
+import cloudinary from '../config/cloudinary.js'
 
 export interface CloudinaryUploadResult {
   url: string
@@ -36,7 +36,7 @@ export function deleteImage(
   return new Promise((resolve, reject) => {
     cloudinary.uploader.destroy(
       publicId,
-      (error, result) => {
+      (error, result: any) => {
         if (error) {
           reject(error)
           return
