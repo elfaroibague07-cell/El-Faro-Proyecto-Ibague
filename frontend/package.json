@@ -8,6 +8,11 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
+  "compilerOptions": {
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["src/*"]
+  },
   "dependencies": {
     "@cloudinary/url-gen": "^1.22.0",
     "@supabase/supabase-js": "^2.110.8",

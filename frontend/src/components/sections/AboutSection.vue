@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import aboutImage from '@/assets/images/about/img3.webp'
+import aboutImage from '@/assets/images/about/img3.jpeg'
 import FadeSection from '../ui/FadeSection.vue'
 </script>
 
