@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { supabase } from '@/lib/supabase'
 
 import ProductDetailPage from '@/pages/ProductDetailPage.vue'
-import PrivacyPolicyPage from '../pages/PrivacyPolicyPage.vue'
+import CatalogBasesPage from '../pages/CatalogBasesPage.vue'
 
 const router = createRouter({
 
@@ -60,6 +60,11 @@ const router = createRouter({
       path: '/proteccion-datos',
       name: 'proteccion-datos',
       component: () => import('@/pages/DataProtectionPage.vue')
+    },
+     {
+      path: '/catalogo/bases',
+      name: 'catalog-bases',
+      component: CatalogBasesPage
     }
 
   ]

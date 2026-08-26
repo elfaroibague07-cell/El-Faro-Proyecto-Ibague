@@ -5,6 +5,7 @@ import AboutSection from '../components/sections/AboutSection.vue'
 import HowItWorksSection from '../components/sections/HowItWorksSection.vue'
 import CatalogSection from '../components/sections/CatalogSection.vue'
 import Footer from '../components/layout/Footer.vue'
+import CatalogBasesPage from './CatalogBasesPage.vue'
 </script>
 
 <template>
@@ -20,6 +21,8 @@ import Footer from '../components/layout/Footer.vue'
 <HowItWorksSection />
 
 <CatalogSection />
+
+<CatalogBasesPage/>
 
 </main>
 
