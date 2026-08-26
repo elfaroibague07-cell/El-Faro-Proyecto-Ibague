@@ -30,26 +30,39 @@ onMounted(() => {
 
 <template>
   <main class="catalog-bases-page">
+
     <section class="catalog-bases-header">
+
       <p class="eyebrow">
         EL FARO
       </p>
 
       <h1>
-        Elige la base para tu esfera
+        Elige la base que acompañará
+        <br />
+        tu recuerdo.
       </h1>
 
       <p class="subtitle">
-        Encuentra la base que mejor acompañe tu esfera de cristal.
+        Descubre nuestras bases y encuentra el complemento
+        perfecto para tu esfera de cristal.
       </p>
+
     </section>
 
-    <section class="catalog-bases-content">
-      <div v-if="loading" class="state-message">
+    <section class="catalog-bases-carousel">
+
+      <div
+        v-if="loading"
+        class="state-message"
+      >
         Cargando bases...
       </div>
 
-      <div v-else-if="error" class="state-message error">
+      <div
+        v-else-if="error"
+        class="state-message error"
+      >
         {{ error }}
       </div>
 
@@ -57,7 +70,9 @@ onMounted(() => {
         v-else
         :items="bases"
       />
+
     </section>
+
   </main>
 </template>
 
@@ -66,58 +81,73 @@ onMounted(() => {
   width: 100%;
   min-height: 100vh;
 
-  padding: 80px 6%;
+  padding: 120px 40px 100px;
 
-  background: #0b0c0e;
+  background: #08090a;
   color: #ffffff;
+
+  overflow: hidden;
 }
 
 .catalog-bases-header {
-  max-width: 760px;
-  margin-bottom: 48px;
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  text-align: center;
 }
 
 .eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 22px;
 
   color: #8d8d8d;
 
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
+
+  letter-spacing: 0.35em;
 }
 
 .catalog-bases-header h1 {
-  margin: 0 0 16px;
+  margin: 0;
 
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1.1;
-  font-weight: 600;
+  color: #ffffff;
+
+  font-size: clamp(2.6rem, 5vw, 5rem);
+
+  font-weight: 500;
+
+  line-height: 1.05;
+
+  letter-spacing: -0.04em;
 }
 
 .subtitle {
-  margin: 0;
+  max-width: 620px;
 
-  max-width: 600px;
+  margin: 26px auto 0;
 
-  color: #a6a6a6;
+  color: #999999;
 
   font-size: 1rem;
+
   line-height: 1.7;
 }
 
-.catalog-bases-content {
+.catalog-bases-carousel {
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
+  max-width: 1400px;
+
+  margin: 70px auto 0;
 }
 
 .state-message {
-  padding: 60px 20px;
+  padding: 80px 20px;
 
   text-align: center;
 
-  color: #a6a6a6;
+  color: #999999;
 }
 
 .state-message.error {
@@ -126,11 +156,19 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .catalog-bases-page {
-    padding: 50px 20px;
+    padding: 90px 20px 70px;
   }
 
-  .catalog-bases-header {
-    margin-bottom: 32px;
+  .catalog-bases-header h1 {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .catalog-bases-carousel {
+    margin-top: 45px;
   }
 }
 </style>
