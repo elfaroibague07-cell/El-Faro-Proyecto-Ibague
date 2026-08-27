@@ -3,7 +3,6 @@
     "target": "esnext",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
@@ -11,5 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true
   },
-  "include": ["src/**/*"]
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
