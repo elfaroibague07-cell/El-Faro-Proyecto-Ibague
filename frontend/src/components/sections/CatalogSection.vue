@@ -573,11 +573,14 @@ watch(
 </script>
 
 <template>
+
   <FadeSection>
+
     <section
       id="catalog"
       class="section"
     >
+
       <div
         class="container catalog-container"
       >
@@ -693,6 +696,7 @@ watch(
             <div class="price-filter-header">
 
               <div class="price-filter-label">
+
                 <span class="price-filter-icon">
                   $
                 </span>
@@ -700,38 +704,43 @@ watch(
                 <span>
                   Precio
                 </span>
+
               </div>
 
-              <span
-                class="price-range-text"
-              >
-                {{
-                  formatPrice(
-                    effectiveMinPrice
-                  )
-                }}
+              <div class="price-filter-actions">
 
-                <span class="price-separator">
-                  —
+                <span
+                  class="price-range-text"
+                >
+                  {{
+                    formatPrice(
+                      effectiveMinPrice
+                    )
+                  }}
+
+                  <span class="price-separator">
+                    —
+                  </span>
+
+                  {{
+                    formatPrice(
+                      effectiveMaxPrice
+                    )
+                  }}
                 </span>
 
-                {{
-                  formatPrice(
-                    effectiveMaxPrice
-                  )
-                }}
-              </span>
+                <button
+                  v-if="hasPriceFilter"
+                  type="button"
+                  class="clear-price-button"
+                  @click="
+                    clearPriceFilter
+                  "
+                >
+                  Limpiar
+                </button>
 
-              <button
-                v-if="hasPriceFilter"
-                type="button"
-                class="clear-price-button"
-                @click="
-                  clearPriceFilter
-                "
-              >
-                Limpiar
-              </button>
+              </div>
 
             </div>
 
@@ -742,6 +751,7 @@ watch(
               <div
                 class="price-slider-track"
               >
+
                 <div
                   class="price-slider-selected"
                   :style="{
@@ -751,6 +761,7 @@ watch(
                       `${100 - maxSliderPosition}%`
                   }"
                 ></div>
+
               </div>
 
               <input
@@ -808,12 +819,14 @@ watch(
           "
           class="catalog-loading"
         >
+
           <ProductSkeleton
             v-for="
               n in productsPerPage
             "
             :key="n"
           />
+
         </div>
 
         <!-- =========================================
@@ -840,6 +853,7 @@ watch(
             </div>
 
             <div>
+
               <h3>
                 No encontramos productos
               </h3>
@@ -848,6 +862,7 @@ watch(
                 Prueba cambiando la categoría
                 o ajustando el rango de precio.
               </p>
+
             </div>
 
             <button
@@ -957,8 +972,11 @@ watch(
         </template>
 
       </div>
+
     </section>
+
   </FadeSection>
+
 </template>
 
 <style scoped>
@@ -969,9 +987,13 @@ watch(
 
 .section {
   position: relative;
-  padding: 9rem 0;
+
+  padding:
+    9rem 0;
+
   overflow: hidden;
 }
+
 
 /* =========================================
    CONTENEDOR
@@ -979,17 +1001,23 @@ watch(
 
 .catalog-container {
   position: relative;
+
   z-index: 2;
 }
+
 
 /* =========================================
    FILTROS
 ========================================= */
 
 .catalog-filters {
-  width: min(1120px, 100%);
-  margin: 0 auto 3rem;
+  width:
+    min(1120px, 100%);
+
+  margin:
+    0 auto 3.5rem;
 }
+
 
 /* =========================================
    CATEGORÍAS
@@ -997,62 +1025,83 @@ watch(
 
 .category-filter-wrapper {
   position: relative;
+
   display: flex;
+
   align-items: center;
+
   width: 100%;
-  margin-bottom: 20px;
+
+  margin-bottom:
+    1.6rem;
 }
+
 
 .category-filter {
   width: 100%;
 
   display: flex;
+
   align-items: center;
 
   gap: 10px;
 
   overflow-x: auto;
+
   overflow-y: hidden;
 
-  padding: 5px 4px 10px;
+  padding:
+    5px 4px 10px;
 
   scroll-behavior: smooth;
 
   scrollbar-width: none;
 }
 
+
 .category-filter::-webkit-scrollbar {
   display: none;
 }
+
 
 /* =========================================
    BOTONES CATEGORÍA
 ========================================= */
 
 .category-button {
-  flex: 0 0 auto;
+  flex:
+    0 0 auto;
 
-  padding: 10px 18px;
+  padding:
+    10px 18px;
 
-  border: 1px solid
+  border:
+    1px solid
     rgba(255, 255, 255, .10);
 
-  border-radius: 999px;
+  border-radius:
+    999px;
 
   background:
     rgba(255, 255, 255, .025);
 
-  color: var(--text-secondary);
+  color:
+    var(--text-secondary);
 
-  font-family: var(--font-body);
+  font-family:
+    var(--font-body);
 
-  font-size: .82rem;
+  font-size:
+    .82rem;
 
-  font-weight: 500;
+  font-weight:
+    500;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   transition:
     background .25s ease,
@@ -1062,8 +1111,10 @@ watch(
     box-shadow .25s ease;
 }
 
+
 .category-button:hover {
-  color: white;
+  color:
+    white;
 
   border-color:
     rgba(255, 255, 255, .22);
@@ -1075,21 +1126,25 @@ watch(
     translateY(-1px);
 }
 
+
 .category-button.active {
   background:
     var(--primary);
 
-  color: #050505;
+  color:
+    #050505;
 
   border-color:
     var(--primary);
 
-  font-weight: 600;
+  font-weight:
+    600;
 
   box-shadow:
     0 5px 16px
     rgba(212, 177, 106, .12);
 }
+
 
 /* =========================================
    BOTONES SCROLL
@@ -1100,17 +1155,24 @@ watch(
 
   z-index: 5;
 
-  width: 38px;
-  height: 38px;
+  width:
+    38px;
+
+  height:
+    38px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
-  border: 1px solid
+  border:
+    1px solid
     rgba(255, 255, 255, .14);
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
   background:
     rgba(7, 11, 20, .92);
@@ -1118,11 +1180,14 @@ watch(
   backdrop-filter:
     blur(10px);
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-size: 1rem;
+  font-size:
+    1rem;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   box-shadow:
     0 8px 25px
@@ -1135,6 +1200,7 @@ watch(
     transform .25s ease;
 }
 
+
 .category-scroll-button:hover {
   background:
     var(--primary);
@@ -1142,19 +1208,23 @@ watch(
   border-color:
     var(--primary);
 
-  color: #050505;
+  color:
+    #050505;
 
   transform:
     scale(1.05);
 }
 
+
 .category-scroll-button.left {
   left: 0;
 }
 
+
 .category-scroll-button.right {
   right: 0;
 }
+
 
 /* =========================================
    SOMBRAS CATEGORÍAS
@@ -1167,14 +1237,18 @@ watch(
   position: absolute;
 
   top: 0;
+
   bottom: 5px;
 
-  width: 50px;
+  width:
+    50px;
 
   z-index: 3;
 
-  pointer-events: none;
+  pointer-events:
+    none;
 }
+
 
 .category-filter-wrapper::before {
   left: 0;
@@ -1187,6 +1261,7 @@ watch(
     );
 }
 
+
 .category-filter-wrapper::after {
   right: 0;
 
@@ -1198,72 +1273,117 @@ watch(
     );
 }
 
+
 /* =========================================
    FILTRO PRECIO
 ========================================= */
 
 .price-filter {
-  width: 100%;
+  width:
+    min(720px, 100%);
+
+  margin-left:
+    0;
 
   padding:
-    14px 18px
-    16px;
+    17px 22px 20px;
 
-  box-sizing: border-box;
+  box-sizing:
+    border-box;
 
   border:
     1px solid
-    rgba(255, 255, 255, .07);
+    rgba(255, 255, 255, .08);
 
-  border-radius: 12px;
+  border-radius:
+    16px;
 
   background:
-    rgba(255, 255, 255, .018);
+    rgba(255, 255, 255, .025);
+
+  backdrop-filter:
+    blur(10px);
+
+  box-shadow:
+    0 12px 35px
+    rgba(0, 0, 0, .12);
 }
+
 
 /* =========================================
    HEADER PRECIO
 ========================================= */
 
 .price-filter-header {
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 14px;
+  justify-content:
+    space-between;
 
-  min-height: 30px;
+  gap:
+    20px;
 
-  margin-bottom: 8px;
+  min-height:
+    30px;
+
+  margin-bottom:
+    10px;
 }
+
+
+/* =========================================
+   LABEL PRECIO
+========================================= */
 
 .price-filter-label {
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    9px;
 
-  color: var(--text);
+  color:
+    var(--text);
 
-  font-family: var(--font-body);
+  font-family:
+    var(--font-body);
 
-  font-size: .82rem;
+  font-size:
+    .82rem;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 }
 
+
 .price-filter-icon {
-  width: 22px;
-  height: 22px;
+  width:
+    24px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height:
+    24px;
 
-  border-radius: 6px;
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    7px;
 
   background:
     rgba(212, 177, 106, .12);
@@ -1271,37 +1391,66 @@ watch(
   color:
     var(--primary);
 
-  font-size: .72rem;
+  font-size:
+    .72rem;
 
-  font-weight: 700;
+  font-weight:
+    700;
 }
 
-.price-range-text {
-  margin-left: auto;
 
+/* =========================================
+   ACCIONES PRECIO
+========================================= */
+
+.price-filter-actions {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+  margin-left:
+    auto;
+}
+
+
+/* =========================================
+   RANGO TEXTO
+========================================= */
+
+.price-range-text {
   color:
     var(--text-secondary);
 
   font-family:
     var(--font-body);
 
-  font-size: .78rem;
+  font-size:
+    .76rem;
 
-  font-weight: 500;
+  font-weight:
+    500;
 
-  white-space: nowrap;
+  white-space:
+    nowrap;
 }
+
 
 .price-separator {
   margin:
-    0 4px;
+    0 5px;
 
   color:
     rgba(255, 255, 255, .30);
 }
 
+
 /* =========================================
-   LIMPIAR PRECIO
+   BOTÓN LIMPIAR
 ========================================= */
 
 .clear-price-button {
@@ -1312,7 +1461,8 @@ watch(
     1px solid
     rgba(255, 255, 255, .10);
 
-  border-radius: 6px;
+  border-radius:
+    7px;
 
   background:
     transparent;
@@ -1323,15 +1473,18 @@ watch(
   font-family:
     var(--font-body);
 
-  font-size: .70rem;
+  font-size:
+    .68rem;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   transition:
     color .2s ease,
     border-color .2s ease,
     background .2s ease;
 }
+
 
 .clear-price-button:hover {
   color:
@@ -1341,30 +1494,41 @@ watch(
     var(--primary);
 
   background:
-    rgba(212, 177, 106, .06);
+    rgba(212, 177, 106, .07);
 }
+
 
 /* =========================================
    SLIDER
 ========================================= */
 
 .price-slider-container {
-  position: relative;
+  position:
+    relative;
 
-  width: 100%;
+  width:
+    100%;
 
-  height: 24px;
+  height:
+    24px;
 }
 
+
 .price-slider-track {
-  position: absolute;
+  position:
+    absolute;
 
-  top: 50%;
+  top:
+    50%;
 
-  left: 0;
-  right: 0;
+  left:
+    0;
 
-  height: 5px;
+  right:
+    0;
+
+  height:
+    4px;
 
   transform:
     translateY(-50%);
@@ -1373,165 +1537,257 @@ watch(
     999px;
 
   background:
-    rgba(255, 255, 255, .09);
+    rgba(255, 255, 255, .10);
 }
 
-.price-slider-selected {
-  position: absolute;
 
-  top: 0;
-  bottom: 0;
+.price-slider-selected {
+  position:
+    absolute;
+
+  top:
+    0;
+
+  bottom:
+    0;
 
   border-radius:
     999px;
 
   background:
     var(--primary);
+
+  box-shadow:
+    0 0 10px
+    rgba(212, 177, 106, .16);
 }
+
 
 .price-range {
-  position: absolute;
+  position:
+    absolute;
 
-  top: 0;
-  left: 0;
+  top:
+    0;
 
-  width: 100%;
+  left:
+    0;
 
-  height: 24px;
+  width:
+    100%;
 
-  margin: 0;
+  height:
+    24px;
 
-  appearance: none;
-  -webkit-appearance: none;
+  margin:
+    0;
 
-  background: transparent;
+  appearance:
+    none;
 
-  pointer-events: none;
+  -webkit-appearance:
+    none;
 
-  outline: none;
+  background:
+    transparent;
+
+  pointer-events:
+    none;
+
+  outline:
+    none;
 }
+
+
+/* =========================================
+   THUMB CHROME
+========================================= */
 
 .price-range::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
+  appearance:
+    none;
 
-  width: 21px;
-  height: 21px;
+  -webkit-appearance:
+    none;
+
+  width:
+    17px;
+
+  height:
+    17px;
 
   border:
     2px solid
     var(--background);
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
   background:
     var(--primary);
 
   box-shadow:
     0 2px 8px
-    rgba(0, 0, 0, .30);
+    rgba(0, 0, 0, .35);
 
-  cursor: grab;
+  cursor:
+    grab;
 
-  pointer-events: auto;
+  pointer-events:
+    auto;
+
+  transition:
+    transform .15s ease;
 }
+
+
+.price-range::-webkit-slider-thumb:hover {
+  transform:
+    scale(1.12);
+}
+
 
 .price-range::-webkit-slider-thumb:active {
-  cursor: grabbing;
+  cursor:
+    grabbing;
+
+  transform:
+    scale(1.08);
 }
 
+
+/* =========================================
+   THUMB FIREFOX
+========================================= */
+
 .price-range::-moz-range-thumb {
-  width: 21px;
-  height: 21px;
+  width:
+    17px;
+
+  height:
+    17px;
 
   border:
     2px solid
     var(--background);
 
-  border-radius: 50%;
+  border-radius:
+    50%;
 
   background:
     var(--primary);
 
   box-shadow:
     0 2px 8px
-    rgba(0, 0, 0, .30);
+    rgba(0, 0, 0, .35);
 
-  cursor: grab;
+  cursor:
+    grab;
 
-  pointer-events: auto;
+  pointer-events:
+    auto;
 }
+
 
 .price-range::-moz-range-track {
-  background: transparent;
+  background:
+    transparent;
 }
+
 
 .price-range-min {
-  z-index: 2;
+  z-index:
+    2;
 }
 
+
 .price-range-max {
-  z-index: 3;
+  z-index:
+    3;
 }
+
 
 /* =========================================
    LOADING
 ========================================= */
 
 .catalog-loading {
-  display: grid;
+  display:
+    grid;
 
   grid-template-columns:
     repeat(3, minmax(0, 1fr));
 
-  gap: 28px;
+  gap:
+    28px;
 
-  width: min(1120px, 100%);
+  width:
+    min(1120px, 100%);
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 }
+
 
 /* =========================================
    SIN RESULTADOS
 ========================================= */
 
 .empty-products {
-  width: min(600px, 100%);
+  width:
+    min(600px, 100%);
 
-  margin: 3rem auto 0;
+  margin:
+    3rem auto 0;
 
   padding:
     40px 30px;
 
-  display: flex;
+  display:
+    flex;
 
-  flex-direction: column;
+  flex-direction:
+    column;
 
-  align-items: center;
+  align-items:
+    center;
 
-  text-align: center;
+  text-align:
+    center;
 
   border:
     1px dashed
     var(--border);
 
-  border-radius: 16px;
+  border-radius:
+    16px;
 
   background:
     rgba(255, 255, 255, .02);
 }
 
+
 .empty-products-icon {
-  width: 50px;
-  height: 50px;
+  width:
+    50px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height:
+    50px;
 
-  margin-bottom: 15px;
+  display:
+    flex;
 
-  border-radius: 14px;
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  margin-bottom:
+    15px;
+
+  border-radius:
+    14px;
 
   background:
     var(--surface-light);
@@ -1539,11 +1795,14 @@ watch(
   color:
     var(--primary);
 
-  font-size: 20px;
+  font-size:
+    20px;
 }
 
+
 .empty-products h3 {
-  margin: 0;
+  margin:
+    0;
 
   color:
     var(--text);
@@ -1551,10 +1810,13 @@ watch(
   font-family:
     var(--font-title);
 
-  font-size: 24px;
+  font-size:
+    24px;
 
-  font-weight: 500;
+  font-weight:
+    500;
 }
+
 
 .empty-products p {
   margin:
@@ -1563,10 +1825,13 @@ watch(
   color:
     var(--text-secondary);
 
-  font-size: 12px;
+  font-size:
+    12px;
 
-  line-height: 1.5;
+  line-height:
+    1.5;
 }
+
 
 .empty-clear-button {
   padding:
@@ -1576,7 +1841,8 @@ watch(
     1px solid
     var(--border);
 
-  border-radius: 9px;
+  border-radius:
+    9px;
 
   background:
     transparent;
@@ -1587,16 +1853,20 @@ watch(
   font-family:
     var(--font-body);
 
-  font-size: .75rem;
+  font-size:
+    .75rem;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   transition:
     all .2s ease;
 }
 
+
 .empty-clear-button:hover {
-  color: #050505;
+  color:
+    #050505;
 
   border-color:
     var(--primary);
@@ -1605,20 +1875,26 @@ watch(
     var(--primary);
 }
 
+
 /* =========================================
    PAGINACIÓN
 ========================================= */
 
 .pagination {
-  display: flex;
+  display:
+    flex;
 
-  justify-content: center;
+  justify-content:
+    center;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 12px;
+  gap:
+    12px;
 
-  width: min(1120px, 100%);
+  width:
+    min(1120px, 100%);
 
   margin:
     4rem auto 0;
@@ -1631,24 +1907,37 @@ watch(
     rgba(255, 255, 255, .06);
 }
 
+
 .pagination-pages {
-  display: flex;
+  display:
+    flex;
 
-  align-items: center;
+  align-items:
+    center;
 
-  gap: 8px;
+  gap:
+    8px;
 }
 
+
 .pagination-button {
-  width: 44px;
-  height: 44px;
+  width:
+    44px;
 
-  display: flex;
+  height:
+    44px;
 
-  align-items: center;
-  justify-content: center;
+  display:
+    flex;
 
-  border-radius: 12px;
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    12px;
 
   border:
     1px solid
@@ -1663,11 +1952,14 @@ watch(
   font-family:
     var(--font-body);
 
-  font-size: .95rem;
+  font-size:
+    .95rem;
 
-  font-weight: 500;
+  font-weight:
+    500;
 
-  cursor: pointer;
+  cursor:
+    pointer;
 
   transition:
     background .25s ease,
@@ -1677,11 +1969,13 @@ watch(
     box-shadow .25s ease;
 }
 
+
 .pagination-button:hover:not(:disabled) {
   background:
     rgba(255, 255, 255, .08);
 
-  color: white;
+  color:
+    white;
 
   border-color:
     rgba(255, 255, 255, .20);
@@ -1694,11 +1988,13 @@ watch(
     rgba(0, 0, 0, .25);
 }
 
+
 .pagination-button.active {
   background:
     rgba(255, 255, 255, .92);
 
-  color: #050505;
+  color:
+    #050505;
 
   border-color:
     rgba(255, 255, 255, .95);
@@ -1708,20 +2004,30 @@ watch(
     rgba(255, 255, 255, .10);
 }
 
+
 .pagination-button.arrow {
-  font-size: 1.25rem;
-  font-weight: 400;
+  font-size:
+    1.25rem;
+
+  font-weight:
+    400;
 }
+
 
 .pagination-button:disabled {
-  opacity: .25;
+  opacity:
+    .25;
 
-  cursor: not-allowed;
+  cursor:
+    not-allowed;
 
-  transform: none;
+  transform:
+    none;
 
-  box-shadow: none;
+  box-shadow:
+    none;
 }
+
 
 /* =========================================
    TABLET
@@ -1736,6 +2042,7 @@ watch(
 
 }
 
+
 /* =========================================
    TABLET PEQUEÑA
 ========================================= */
@@ -1743,20 +2050,31 @@ watch(
 @media (max-width: 800px) {
 
   .category-scroll-button {
-    display: none;
+    display:
+      none;
   }
 
   .category-filter-wrapper::before,
   .category-filter-wrapper::after {
-    display: none;
+    display:
+      none;
   }
 
   .category-filter {
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left:
+      2px;
+
+    padding-right:
+      2px;
+  }
+
+  .price-filter {
+    width:
+      100%;
   }
 
 }
+
 
 /* =========================================
    MÓVIL
@@ -1769,22 +2087,27 @@ watch(
       7rem 0;
   }
 
+
   .catalog-filters {
     margin-bottom:
       2.5rem;
   }
+
 
   .category-filter-wrapper {
     margin-bottom:
       14px;
   }
 
+
   .category-filter {
-    gap: 8px;
+    gap:
+      8px;
 
     padding:
       4px 2px 8px;
   }
+
 
   .category-button {
     padding:
@@ -1794,40 +2117,67 @@ watch(
       .80rem;
   }
 
+
   /* -----------------------------
      PRECIO
   ----------------------------- */
 
   .price-filter {
+    width:
+      100%;
+
     padding:
-      13px 14px 14px;
+      15px 16px 17px;
+
+    border-radius:
+      14px;
   }
+
 
   .price-filter-header {
-    flex-wrap: wrap;
+    align-items:
+      flex-start;
 
-    gap: 8px;
+    flex-direction:
+      column;
+
+    gap:
+      9px;
+
+    margin-bottom:
+      8px;
   }
 
-  .price-range-text {
-    margin-left: auto;
 
+  .price-filter-actions {
+    width:
+      100%;
+
+    justify-content:
+      space-between;
+
+    margin-left:
+      0;
+  }
+
+
+  .price-range-text {
     font-size:
       .72rem;
   }
 
+
   .clear-price-button {
-    order: 3;
-
-    width: 100%;
-
-    text-align: center;
+    font-size:
+      .68rem;
   }
+
 
   .price-slider-container {
     margin-top:
-      4px;
+      2px;
   }
+
 
   /* -----------------------------
      LOADING
@@ -1837,33 +2187,43 @@ watch(
     grid-template-columns:
       1fr;
 
-    gap: 24px;
+    gap:
+      24px;
   }
+
 
   /* -----------------------------
      PAGINACIÓN
   ----------------------------- */
 
   .pagination {
-    gap: 8px;
+    gap:
+      8px;
 
     margin-top:
       3rem;
   }
 
+
   .pagination-pages {
-    gap: 5px;
+    gap:
+      5px;
   }
 
+
   .pagination-button {
-    width: 40px;
-    height: 40px;
+    width:
+      40px;
+
+    height:
+      40px;
 
     border-radius:
       10px;
   }
 
 }
+
 
 /* =========================================
    MÓVIL PEQUEÑO
@@ -1872,13 +2232,22 @@ watch(
 @media (max-width: 420px) {
 
   .category-filter {
-    gap: 7px;
+    gap:
+      7px;
   }
+
 
   .category-button {
     padding:
       8px 13px;
   }
+
+
+  .price-filter {
+    padding:
+      14px 14px 16px;
+  }
+
 
   .price-range-text {
     font-size:
@@ -1886,4 +2255,5 @@ watch(
   }
 
 }
+
 </style>
