@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-  "dev": "tsx watch src/server.js",
-  "build": "npx tsc src/server.js --rootDir src --outDir dist --module nodenext --moduleResolution nodenext --target esnext",
+  "dev": "tsx watch src/server.ts",
+  "build": "npx tsc src/server.ts --rootDir src --outDir dist --module nodenext --moduleResolution nodenext --target esnext",
   "start": "node dist/server.js"
   },
   "keywords": [],
