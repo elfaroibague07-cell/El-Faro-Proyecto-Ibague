@@ -1,13 +1,11 @@
 import express from 'express'
 
-import uploadRoutes from './routes/upload.routes'
-import productRoutes from './routes/product.routes'
-import categoryRoutes from './routes/category.routes'
-import baseRoutes from './routes/base.routes'
+import uploadRoutes from './routes/upload.routes.js'
+import productRoutes from './routes/product.routes.js'
+import categoryRoutes from './routes/category.routes.js'
+import baseRoutes from './routes/base.routes.js'
 
 const app = express()
-
-//comentariosss ddd
 
 app.use(express.json())
 
