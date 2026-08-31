@@ -15,3 +15,23 @@ export async function getBases() {
 
   return data
 }
+
+/* =========================================
+   AGREGAR ESTA FUNCIÓN QUE FALTABA
+========================================= */
+export async function getBaseBySlug(slug: string) {
+  const { data, error } = await supabase
+    .from('bases')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null
+    }
+    throw error
+  }
+
+  return data
+}

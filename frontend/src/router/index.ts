@@ -65,6 +65,11 @@ const router = createRouter({
       path: '/catalogo/bases',
       name: 'catalog-bases',
       component: CatalogBasesPage
+    },
+    {
+      path: '/catalogo/bases/:slug',
+      name: 'base-detalle',
+      component: () => import('@/pages/BaseDetailPage.vue') // O la ruta de tu vista
     }
 
   ]

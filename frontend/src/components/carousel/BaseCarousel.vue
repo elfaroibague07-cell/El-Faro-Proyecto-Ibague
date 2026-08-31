@@ -279,12 +279,11 @@ onBeforeUnmount(() => {
         <BaseCarouselCard
           v-for="(item, index) in carouselItems"
           :key="`${item.id}-${index}`"
+          :slug="item.slug"
           :image="item.image_url"
           :title="item.name"
           :description="item.description"
-          :active="
-            index === trackIndex
-          "
+          :active="index === trackIndex"
         />
 
       </div>
