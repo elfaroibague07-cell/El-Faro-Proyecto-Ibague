@@ -28,17 +28,31 @@ const categoryStore = useCategoryStore()
 ========================================= */
 
 const selectedCategory = ref<string | null>(null)
-
 const selectedMinPrice = ref<number | null>(null)
-
 const selectedMaxPrice = ref<number | null>(null)
 
 /* =========================================
-   SCROLL CATEGORÍAS
+   ESTADOS DE LOS DROPDOWNS (ESTILO ZARA/E-COMMERCE)
+========================================= */
+
+const activeDropdown = ref<'price' | 'category' | null>(null)
+
+function toggleDropdown(dropdown: 'price' | 'category') {
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+}
+
+function closeDropdowns(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('.filter-dropdown-container')) {
+    activeDropdown.value = null
+  }
+}
+
+/* =========================================
+   SCROLL CATEGORÍAS (DENTRO DEL DROPDOWN)
 ========================================= */
 
 const categoryScroller = ref<HTMLElement | null>(null)
-
 const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
 
@@ -47,7 +61,6 @@ const canScrollRight = ref(false)
 ========================================= */
 
 const currentPage = ref(1)
-
 const productsPerPage = 6
 
 /* =========================================
@@ -59,101 +72,43 @@ const activeProducts = computed(() => {
 })
 
 /* =========================================
-   PRECIO MÍNIMO REAL
+   PRECIOS MÍNIMOS Y MÁXIMOS REALES
 ========================================= */
 
 const minimumProductPrice = computed(() => {
-  if (!activeProducts.value.length) {
-    return 0
-  }
-
-  return Math.min(
-    ...activeProducts.value.map(product =>
-      Number(product.price)
-    )
-  )
+  if (!activeProducts.value.length) return 0
+  return Math.min(...activeProducts.value.map(p => Number(p.price)))
 })
-
-/* =========================================
-   PRECIO MÁXIMO REAL
-========================================= */
 
 const maximumProductPrice = computed(() => {
-  if (!activeProducts.value.length) {
-    return 0
-  }
-
-  return Math.max(
-    ...activeProducts.value.map(product =>
-      Number(product.price)
-    )
-  )
+  if (!activeProducts.value.length) return 0
+  return Math.max(...activeProducts.value.map(p => Number(p.price)))
 })
-
-/* =========================================
-   PRECIO MÍNIMO EFECTIVO
-========================================= */
 
 const effectiveMinPrice = computed(() => {
-  return (
-    selectedMinPrice.value ??
-    minimumProductPrice.value
-  )
+  return selectedMinPrice.value ?? minimumProductPrice.value
 })
-
-/* =========================================
-   PRECIO MÁXIMO EFECTIVO
-========================================= */
 
 const effectiveMaxPrice = computed(() => {
-  return (
-    selectedMaxPrice.value ??
-    maximumProductPrice.value
-  )
+  return selectedMaxPrice.value ?? maximumProductPrice.value
 })
 
 /* =========================================
-   POSICIÓN SLIDER MÍNIMO
+   POSICIÓN SLIDERS
 ========================================= */
 
 const minSliderPosition = computed(() => {
   const min = minimumProductPrice.value
   const max = maximumProductPrice.value
-
-  if (max <= min) {
-    return 0
-  }
-
-  return (
-    (
-      effectiveMinPrice.value - min
-    ) /
-    (
-      max - min
-    )
-  ) * 100
+  if (max <= min) return 0
+  return ((effectiveMinPrice.value - min) / (max - min)) * 100
 })
-
-/* =========================================
-   POSICIÓN SLIDER MÁXIMO
-========================================= */
 
 const maxSliderPosition = computed(() => {
   const min = minimumProductPrice.value
   const max = maximumProductPrice.value
-
-  if (max <= min) {
-    return 100
-  }
-
-  return (
-    (
-      effectiveMaxPrice.value - min
-    ) /
-    (
-      max - min
-    )
-  ) * 100
+  if (max <= min) return 100
+  return ((effectiveMaxPrice.value - min) / (max - min)) * 100
 })
 
 /* =========================================
@@ -164,2096 +119,790 @@ const availableProducts = computed(() => {
   let products = activeProducts.value
 
   if (selectedCategory.value) {
-    products = products.filter(
-      product =>
-        product.category_id ===
-        selectedCategory.value
-    )
+    products = products.filter(p => p.category_id === selectedCategory.value)
   }
 
-  products = products.filter(product => {
-    const price = Number(product.price)
-
-    return (
-      price >= effectiveMinPrice.value &&
-      price <= effectiveMaxPrice.value
-    )
+  products = products.filter(p => {
+    const price = Number(p.price)
+    return price >= effectiveMinPrice.value && price <= effectiveMaxPrice.value
   })
 
   return products
 })
 
-/* =========================================
-   TOTAL PÁGINAS
-========================================= */
-
 const totalPages = computed(() => {
-  return Math.ceil(
-    availableProducts.value.length /
-    productsPerPage
-  )
+  return Math.ceil(availableProducts.value.length / productsPerPage)
 })
-
-/* =========================================
-   PRODUCTOS PAGINADOS
-========================================= */
 
 const paginatedProducts = computed(() => {
-  const start =
-    (currentPage.value - 1) *
-    productsPerPage
-
-  const end =
-    start +
-    productsPerPage
-
-  return availableProducts.value.slice(
-    start,
-    end
-  )
+  const start = (currentPage.value - 1) * productsPerPage
+  const end = start + productsPerPage
+  return availableProducts.value.slice(start, end)
 })
-
-/* =========================================
-   FILTRO PRECIO ACTIVO
-========================================= */
 
 const hasPriceFilter = computed(() => {
-  return (
-    selectedMinPrice.value !== null ||
-    selectedMaxPrice.value !== null
-  )
+  return selectedMinPrice.value !== null || selectedMaxPrice.value !== null
 })
-
-/* =========================================
-   FILTROS ACTIVOS
-========================================= */
 
 const hasActiveFilters = computed(() => {
-  return (
-    selectedCategory.value !== null ||
-    hasPriceFilter.value
-  )
+  return selectedCategory.value !== null || hasPriceFilter.value
 })
 
 /* =========================================
-   FORMATEAR PRECIO
+   UTILIDADES Y LABELS
 ========================================= */
 
 function formatPrice(price: number) {
-  return new Intl.NumberFormat(
-    'es-CO',
-    {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
-    }
-  ).format(price)
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0
+  }).format(price)
 }
 
-/* =========================================
-   CAMBIAR CATEGORÍA
-========================================= */
+const currentCategoryName = computed(() => {
+  if (selectedCategory.value === null) return 'Todas las categorias'
+  const found = categoryStore.categories.find(c => c.id === selectedCategory.value)
+  return found ? found.name : 'Categoría'
+})
 
-function changeCategory(
-  categoryId: string | null
-) {
+function changeCategory(categoryId: string | null) {
   selectedCategory.value = categoryId
   currentPage.value = 1
+  activeDropdown.value = null
 }
-
-/* =========================================
-   CAMBIAR PRECIO MÍNIMO
-========================================= */
 
 function changeMinPrice(event: Event) {
-  const target =
-    event.target as HTMLInputElement
-
+  const target = event.target as HTMLInputElement
   const value = Number(target.value)
+  const maxLimit = effectiveMaxPrice.value
+  const newMin = Math.min(value, maxLimit - 1000)
 
-  const max = effectiveMaxPrice.value
-
-  const newMin = Math.min(value, max)
-
-  if (
-    newMin <=
-    minimumProductPrice.value
-  ) {
-    selectedMinPrice.value = null
-  } else {
-    selectedMinPrice.value = newMin
-  }
-
+  selectedMinPrice.value = newMin <= minimumProductPrice.value ? null : newMin
   currentPage.value = 1
 }
-
-/* =========================================
-   CAMBIAR PRECIO MÁXIMO
-========================================= */
 
 function changeMaxPrice(event: Event) {
-  const target =
-    event.target as HTMLInputElement
-
+  const target = event.target as HTMLInputElement
   const value = Number(target.value)
+  const minLimit = effectiveMinPrice.value
+  const newMax = Math.max(value, minLimit + 1000)
 
-  const min = effectiveMinPrice.value
-
-  const newMax = Math.max(value, min)
-
-  if (
-    newMax >=
-    maximumProductPrice.value
-  ) {
-    selectedMaxPrice.value = null
-  } else {
-    selectedMaxPrice.value = newMax
-  }
-
+  selectedMaxPrice.value = newMax >= maximumProductPrice.value ? null : newMax
   currentPage.value = 1
 }
-
-/* =========================================
-   LIMPIAR PRECIO
-========================================= */
 
 function clearPriceFilter() {
   selectedMinPrice.value = null
   selectedMaxPrice.value = null
-
   currentPage.value = 1
 }
-
-/* =========================================
-   LIMPIAR TODOS LOS FILTROS
-========================================= */
 
 function clearAllFilters() {
   selectedCategory.value = null
   selectedMinPrice.value = null
   selectedMaxPrice.value = null
-
   currentPage.value = 1
+  activeDropdown.value = null
 }
-
-/* =========================================
-   CAMBIAR PÁGINA
-========================================= */
 
 function changePage(page: number) {
-  if (
-    page < 1 ||
-    page > totalPages.value
-  ) {
-    return
-  }
-
+  if (page < 1 || page > totalPages.value) return
   currentPage.value = page
-
-  document
-    .getElementById('catalog')
-    ?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    })
+  document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-/* =========================================
-   ACTUALIZAR SCROLL CATEGORÍAS
-========================================= */
-
 function updateCategoryScroll() {
-  const element =
-    categoryScroller.value
-
+  const element = categoryScroller.value
   if (!element) {
     canScrollLeft.value = false
     canScrollRight.value = false
     return
   }
-
-  const maxScroll =
-    element.scrollWidth -
-    element.clientWidth
-
-  canScrollLeft.value =
-    element.scrollLeft > 2
-
-  canScrollRight.value =
-    element.scrollLeft <
-    maxScroll - 2
+  const maxScroll = element.scrollWidth - element.clientWidth
+  canScrollLeft.value = element.scrollLeft > 2
+  canScrollRight.value = element.scrollLeft < maxScroll - 2
 }
 
-/* =========================================
-   SCROLL CATEGORÍAS
-========================================= */
-
-function scrollCategories(
-  direction: 'left' | 'right'
-) {
-  const element =
-    categoryScroller.value
-
-  if (!element) {
-    return
-  }
-
-  const amount =
-    Math.max(
-      element.clientWidth * 0.7,
-      240
-    )
-
+function scrollCategories(direction: 'left' | 'right') {
+  const element = categoryScroller.value
+  if (!element) return
+  const amount = Math.max(element.clientWidth * 0.7, 240)
   element.scrollBy({
-    left:
-      direction === 'right'
-        ? amount
-        : -amount,
+    left: direction === 'right' ? amount : -amount,
     behavior: 'smooth'
   })
-
-  setTimeout(
-    updateCategoryScroll,
-    350
-  )
+  setTimeout(updateCategoryScroll, 350)
 }
-
-/* =========================================
-   SCROLL CATEGORÍA ACTIVA
-========================================= */
-
-async function scrollActiveCategoryIntoView() {
-  await nextTick()
-
-  const element =
-    categoryScroller.value
-
-  if (!element) {
-    return
-  }
-
-  const activeButton =
-    element.querySelector(
-      '.category-button.active'
-    ) as HTMLElement | null
-
-  if (!activeButton) {
-    return
-  }
-
-  activeButton.scrollIntoView({
-    behavior: 'smooth',
-    block: 'nearest',
-    inline: 'center'
-  })
-
-  setTimeout(
-    updateCategoryScroll,
-    350
-  )
-}
-
-/* =========================================
-   CARGAR INFORMACIÓN
-========================================= */
 
 onMounted(async () => {
-  await Promise.all([
-    store.loadProducts(),
-    categoryStore.loadCategories()
-  ])
-
+  await Promise.all([store.loadProducts(), categoryStore.loadCategories()])
   currentPage.value = 1
-
+  document.addEventListener('click', closeDropdowns)
   await nextTick()
-
   updateCategoryScroll()
-
-  window.addEventListener(
-    'resize',
-    updateCategoryScroll
-  )
+  window.addEventListener('resize', updateCategoryScroll)
 })
-
-/* =========================================
-   LIMPIAR EVENTOS
-========================================= */
 
 onBeforeUnmount(() => {
-  window.removeEventListener(
-    'resize',
-    updateCategoryScroll
-  )
+  document.removeEventListener('click', closeDropdowns)
+  window.removeEventListener('resize', updateCategoryScroll)
 })
 
-/* =========================================
-   OBSERVAR CATEGORÍAS
-========================================= */
+watch(() => categoryStore.categories.length, async () => {
+  await nextTick()
+  updateCategoryScroll()
+})
 
-watch(
-  () => categoryStore.categories.length,
-  async () => {
-    await nextTick()
-    updateCategoryScroll()
+watch(availableProducts, () => {
+  if (totalPages.value > 0 && currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
   }
-)
-
-/* =========================================
-   OBSERVAR PRODUCTOS FILTRADOS
-========================================= */
-
-watch(
-  availableProducts,
-  () => {
-    if (
-      totalPages.value > 0 &&
-      currentPage.value >
-        totalPages.value
-    ) {
-      currentPage.value =
-        totalPages.value
-    }
-
-    if (totalPages.value === 0) {
-      currentPage.value = 1
-    }
-  }
-)
-
-/* =========================================
-   OBSERVAR CATEGORÍA
-========================================= */
-
-watch(
-  selectedCategory,
-  async () => {
-    await scrollActiveCategoryIntoView()
-  }
-)
-
-/* =========================================
-   OBSERVAR RANGO DE PRECIOS
-========================================= */
-
-watch(
-  [
-    minimumProductPrice,
-    maximumProductPrice
-  ],
-  () => {
-    const min =
-      minimumProductPrice.value
-
-    const max =
-      maximumProductPrice.value
-
-    if (
-      selectedMinPrice.value !== null &&
-      (
-        selectedMinPrice.value < min ||
-        selectedMinPrice.value > max
-      )
-    ) {
-      selectedMinPrice.value = null
-    }
-
-    if (
-      selectedMaxPrice.value !== null &&
-      (
-        selectedMaxPrice.value > max ||
-        selectedMaxPrice.value < min
-      )
-    ) {
-      selectedMaxPrice.value = null
-    }
-
+  if (totalPages.value === 0) {
     currentPage.value = 1
   }
-)
+})
 </script>
 
 <template>
-
   <FadeSection>
-
-    <section
-      id="catalog"
-      class="section"
-    >
-
-      <div
-        class="container catalog-container"
-      >
-
-        <!-- =========================================
-             HEADER
-        ========================================== -->
+    <section id="catalog" class="catalog-section">
+      <div class="container catalog-container">
 
         <CatalogHeader />
 
         <!-- =========================================
-             FILTROS
-        ========================================== -->
+             BARRA DE FILTROS SUPERIOR (ESTILO MINIMALISTA E-COMMERCE)
+        ========================================= -->
+        <div class="catalog-filters-bar">
+          <div class="filters-left-group">
+            <span class="filters-label">Filtrar:</span>
 
-        <div class="catalog-filters">
-
-          <!-- =======================================
-               CATEGORÍAS
-          ======================================== -->
-
-          <div
-            v-if="
-              categoryStore.categories.length
-            "
-            class="category-filter-wrapper"
-          >
-
-            <button
-              v-if="canScrollLeft"
-              type="button"
-              class="category-scroll-button left"
-              aria-label="Ver categorías anteriores"
-              @click="
-                scrollCategories('left')
-              "
-            >
-              ←
-            </button>
-
-            <div
-              ref="categoryScroller"
-              class="category-filter"
-              @scroll="
-                updateCategoryScroll
-              "
-            >
-
+            <!-- DROPDOWN CATEGORÍAS -->
+            <div class="filter-dropdown-container">
               <button
                 type="button"
-                class="category-button"
-                :class="{
-                  active:
-                    selectedCategory === null
-                }"
-                @click="
-                  changeCategory(null)
-                "
+                class="filter-trigger-btn"
+                :class="{ active: activeDropdown === 'category' || selectedCategory !== null }"
+                @click.stop="toggleDropdown('category')"
               >
-                Todas
+                <span>{{ currentCategoryName }}</span>
+                <span class="dropdown-chevron" :class="{ open: activeDropdown === 'category' }">⌄</span>
               </button>
 
+              <div v-if="activeDropdown === 'category'" class="dropdown-popup-panel category-panel">
+                <div class="dropdown-panel-header">
+                  <span class="panel-title">Categorías</span>
+                  <button
+                    v-if="selectedCategory !== null"
+                    type="button"
+                    class="panel-clear-action"
+                    @click="changeCategory(null)"
+                  >
+                    Ver todas
+                  </button>
+                </div>
+
+                <div class="categories-dropdown-scroller-wrapper">
+                  <button
+                    v-if="canScrollLeft"
+                    type="button"
+                    class="scroll-control-btn left"
+                    @click="scrollCategories('left')"
+                  >
+                    ‹
+                  </button>
+
+                  <div
+                    ref="categoryScroller"
+                    class="categories-horizontal-list"
+                    @scroll="updateCategoryScroll"
+                  >
+                    <button
+                      type="button"
+                      class="category-pill-item"
+                      :class="{ active: selectedCategory === null }"
+                      @click="changeCategory(null)"
+                    >
+                      Todas las bases
+                    </button>
+
+                    <button
+                      v-for="category in categoryStore.categories"
+                      :key="category.id"
+                      type="button"
+                      class="category-pill-item"
+                      :class="{ active: selectedCategory === category.id }"
+                      @click="changeCategory(category.id)"
+                    >
+                      {{ category.name }}
+                    </button>
+                  </div>
+
+                  <button
+                    v-if="canScrollRight"
+                    type="button"
+                    class="scroll-control-btn right"
+                    @click="scrollCategories('right')"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- DROPDOWN PRECIO -->
+            <div class="filter-dropdown-container">
               <button
-                v-for="
-                  category in
-                    categoryStore.categories
-                "
-                :key="category.id"
                 type="button"
-                class="category-button"
-                :class="{
-                  active:
-                    selectedCategory ===
-                    category.id
-                }"
-                @click="
-                  changeCategory(
-                    category.id
-                  )
-                "
+                class="filter-trigger-btn"
+                :class="{ active: activeDropdown === 'price' || hasPriceFilter }"
+                @click.stop="toggleDropdown('price')"
               >
-                {{ category.name }}
+                <span>Precio</span>
+                <span class="dropdown-chevron" :class="{ open: activeDropdown === 'price' }">⌄</span>
               </button>
 
-            </div>
+              <div v-if="activeDropdown === 'price'" class="dropdown-popup-panel price-panel">
+                <div class="dropdown-panel-header">
+                  <span class="panel-title">Rango de Precio</span>
+                  <button
+                    v-if="hasPriceFilter"
+                    type="button"
+                    class="panel-clear-action"
+                    @click="clearPriceFilter"
+                  >
+                    Limpiar
+                  </button>
+                </div>
 
-            <button
-              v-if="canScrollRight"
-              type="button"
-              class="category-scroll-button right"
-              aria-label="Ver más categorías"
-              @click="
-                scrollCategories('right')
-              "
-            >
-              →
-            </button>
+                <div class="price-widget-body">
+                  <div class="price-box-meta">
+                    <span>{{ formatPrice(effectiveMinPrice) }}</span>
+                    <span class="separator-dash">-</span>
+                    <span>{{ formatPrice(effectiveMaxPrice) }}</span>
+                  </div>
 
-          </div>
+                  <div class="dual-track-inputs-container">
+                    <div class="background-base-line">
+                      <div
+                        class="active-range-highlight"
+                        :style="{
+                          left: `${minSliderPosition}%`,
+                          right: `${100 - maxSliderPosition}%`
+                        }"
+                      ></div>
+                    </div>
 
-          <!-- =========================================
-               FILTRO PRECIO
-          ========================================== -->
+                    <input
+                      type="range"
+                      class="custom-range-slider min-range"
+                      :min="minimumProductPrice"
+                      :max="maximumProductPrice"
+                      :value="effectiveMinPrice"
+                      :step="1000"
+                      @input="changeMinPrice"
+                    />
 
-          <div
-            v-if="
-              activeProducts.length &&
-              maximumProductPrice >
-              minimumProductPrice
-            "
-            class="price-filter"
-          >
-
-            <div class="price-filter-header">
-
-              <div class="price-filter-label">
-
-                <span class="price-filter-icon">
-                  $
-                </span>
-
-                <span>
-                  Precio
-                </span>
-
+                    <input
+                      type="range"
+                      class="custom-range-slider max-range"
+                      :min="minimumProductPrice"
+                      :max="maximumProductPrice"
+                      :value="effectiveMaxPrice"
+                      :step="1000"
+                      @input="changeMaxPrice"
+                    />
+                  </div>
+                </div>
               </div>
-
-              <div class="price-filter-actions">
-
-                <span
-                  class="price-range-text"
-                >
-                  {{
-                    formatPrice(
-                      effectiveMinPrice
-                    )
-                  }}
-
-                  <span class="price-separator">
-                    —
-                  </span>
-
-                  {{
-                    formatPrice(
-                      effectiveMaxPrice
-                    )
-                  }}
-                </span>
-
-                <button
-                  v-if="hasPriceFilter"
-                  type="button"
-                  class="clear-price-button"
-                  @click="
-                    clearPriceFilter
-                  "
-                >
-                  Limpiar
-                </button>
-
-              </div>
-
             </div>
 
-            <div
-              class="price-slider-container"
-            >
-
-              <div
-                class="price-slider-track"
-              >
-
-                <div
-                  class="price-slider-selected"
-                  :style="{
-                    left:
-                      `${minSliderPosition}%`,
-                    right:
-                      `${100 - maxSliderPosition}%`
-                  }"
-                ></div>
-
-              </div>
-
-              <input
-                type="range"
-                class="price-range price-range-min"
-                :min="
-                  minimumProductPrice
-                "
-                :max="
-                  maximumProductPrice
-                "
-                :value="
-                  effectiveMinPrice
-                "
-                :step="1000"
-                aria-label="Precio mínimo"
-                @input="
-                  changeMinPrice
-                "
-              />
-
-              <input
-                type="range"
-                class="price-range price-range-max"
-                :min="
-                  minimumProductPrice
-                "
-                :max="
-                  maximumProductPrice
-                "
-                :value="
-                  effectiveMaxPrice
-                "
-                :step="1000"
-                aria-label="Precio máximo"
-                @input="
-                  changeMaxPrice
-                "
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- =========================================
-             LOADING
-        ========================================== -->
-
-        <div
-          v-if="
-            store.loading ||
-            categoryStore.loading
-          "
-          class="catalog-loading"
-        >
-
-          <ProductSkeleton
-            v-for="
-              n in productsPerPage
-            "
-            :key="n"
-          />
-
-        </div>
-
-        <!-- =========================================
-             CONTENIDO
-        ========================================== -->
-
-        <template v-else>
-
-          <!-- =======================================
-               SIN RESULTADOS
-          ======================================== -->
-
-          <div
-            v-if="
-              !availableProducts.length
-            "
-            class="empty-products"
-          >
-
-            <div
-              class="empty-products-icon"
-            >
-              ◇
-            </div>
-
-            <div>
-
-              <h3>
-                No encontramos productos
-              </h3>
-
-              <p>
-                Prueba cambiando la categoría
-                o ajustando el rango de precio.
-              </p>
-
-            </div>
-
+            <!-- BOTÓN RESTABLECER GLOBAL -->
             <button
               v-if="hasActiveFilters"
               type="button"
-              class="empty-clear-button"
-              @click="
-                clearAllFilters
-              "
+              class="global-reset-inline"
+              @click="clearAllFilters"
             >
-              Limpiar filtros
+              × Restablecer filtros
             </button>
-
           </div>
 
-          <!-- =======================================
-               PRODUCTOS
-          ======================================== -->
+          <div class="filters-right-group">
+            <span class="products-count-label">{{ availableProducts.length }} productos</span>
+          </div>
+        </div>
+
+        <!-- =========================================
+             ESTADO DE CARGA
+        ========================================= -->
+        <div v-if="store.loading || categoryStore.loading" class="catalog-grid-skeleton">
+          <ProductSkeleton v-for="n in productsPerPage" :key="n" />
+        </div>
+
+        <!-- =========================================
+             GRILLA Y ESTADOS VACÍOS
+        ========================================= -->
+        <template v-else>
+          <div v-if="!availableProducts.length" class="empty-results-container">
+            <div class="empty-state-icon">❖</div>
+            <h3>Sin resultados coincidentes</h3>
+            <p>Intenta restablecer los filtros para visualizar otras opciones disponibles en nuestro catálogo.</p>
+            <button
+              type="button"
+              class="empty-reset-action"
+              @click="clearAllFilters"
+            >
+              Ver todo el catálogo
+            </button>
+          </div>
 
           <template v-else>
+            <ProductGrid :products="paginatedProducts" />
 
-            <ProductGrid
-              :products="
-                paginatedProducts
-              "
-            />
-
-            <!-- =====================================
-                 PAGINACIÓN
-            ====================================== -->
-
-            <div
-              v-if="totalPages > 1"
-              class="pagination"
-              aria-label="Paginación del catálogo"
-            >
-
+            <!-- PAGINACIÓN -->
+            <div v-if="totalPages > 1" class="catalog-pagination">
               <button
                 type="button"
-                class="pagination-button arrow"
-                :disabled="
-                  currentPage === 1
-                "
-                aria-label="Página anterior"
-                @click="
-                  changePage(
-                    currentPage - 1
-                  )
-                "
+                class="page-nav-arrow"
+                :disabled="currentPage === 1"
+                @click="changePage(currentPage - 1)"
               >
-                ←
+                ← Anterior
               </button>
 
-              <div
-                class="pagination-pages"
-              >
-
+              <div class="page-numbers-wrapper">
                 <button
-                  v-for="
-                    page in totalPages
-                  "
+                  v-for="page in totalPages"
                   :key="page"
                   type="button"
-                  class="pagination-button"
-                  :class="{
-                    active:
-                      currentPage === page
-                  }"
-                  :aria-current="
-                    currentPage === page
-                      ? 'page'
-                      : undefined
-                  "
-                  :aria-label="
-                    `Ir a la página ${page}`
-                  "
-                  @click="
-                    changePage(page)
-                  "
+                  class="page-number-pill"
+                  :class="{ active: currentPage === page }"
+                  @click="changePage(page)"
                 >
                   {{ page }}
                 </button>
-
               </div>
 
               <button
                 type="button"
-                class="pagination-button arrow"
-                :disabled="
-                  currentPage ===
-                  totalPages
-                "
-                aria-label="Página siguiente"
-                @click="
-                  changePage(
-                    currentPage + 1
-                  )
-                "
+                class="page-nav-arrow"
+                :disabled="currentPage === totalPages"
+                @click="changePage(currentPage + 1)"
               >
-                →
+                Siguiente →
               </button>
-
             </div>
-
           </template>
-
         </template>
 
       </div>
-
     </section>
-
   </FadeSection>
-
 </template>
 
 <style scoped>
-
-/* =========================================
-   SECCIÓN
-========================================= */
-
-.section {
+.catalog-section {
   position: relative;
-
-  padding:
-    9rem 0;
-
-  overflow: hidden;
+  padding: 8rem 0 10rem;
+  background-color: var(--background);
 }
-
-
-/* =========================================
-   CONTENEDOR
-========================================= */
 
 .catalog-container {
   position: relative;
-
   z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-
 /* =========================================
-   FILTROS
+   BARRA DE FILTROS SUPERIOR
 ========================================= */
-
-.catalog-filters {
-  width:
-    min(1120px, 100%);
-
-  margin:
-    0 auto 3.5rem;
-}
-
-
-/* =========================================
-   CATEGORÍAS
-========================================= */
-
-.category-filter-wrapper {
+.catalog-filters-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
-
-  display: flex;
-
-  align-items: center;
-
-  width: 100%;
-
-  margin-bottom:
-    1.6rem;
+  z-index: 50;
 }
 
-
-.category-filter {
-  width: 100%;
-
+.filters-left-group {
   display: flex;
-
   align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
 
-  gap: 10px;
+.filters-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
 
+.filter-dropdown-container {
+  position: relative;
+}
+
+.filter-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.filter-trigger-btn:hover,
+.filter-trigger-btn.active {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dropdown-chevron {
+  font-size: 0.75rem;
+  transition: transform 0.25s ease;
+}
+
+.dropdown-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* =========================================
+   PANeles FLOTANTES (DROPDOWNS)
+========================================= */
+.dropdown-popup-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  animation: fadeInPanel 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-panel {
+  width: 420px;
+  max-width: 90vw;
+}
+
+.price-panel {
+  width: 280px;
+}
+
+@keyframes fadeInPanel {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.panel-clear-action {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  opacity: 0.85;
+}
+
+.panel-clear-action:hover {
+  opacity: 1;
+}
+
+/* Carrusel de categorías dentro del panel */
+.categories-dropdown-scroller-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.categories-horizontal-list {
+  display: flex;
+  gap: 0.5rem;
   overflow-x: auto;
-
-  overflow-y: hidden;
-
-  padding:
-    5px 4px 10px;
-
   scroll-behavior: smooth;
-
   scrollbar-width: none;
+  padding: 0.2rem 0;
+  width: 100%;
 }
 
-
-.category-filter::-webkit-scrollbar {
+.categories-horizontal-list::-webkit-scrollbar {
   display: none;
 }
 
-
-/* =========================================
-   BOTONES CATEGORÍA
-========================================= */
-
-.category-button {
-  flex:
-    0 0 auto;
-
-  padding:
-    10px 18px;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, .10);
-
-  border-radius:
-    999px;
-
-  background:
-    rgba(255, 255, 255, .025);
-
-  color:
-    var(--text-secondary);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .82rem;
-
-  font-weight:
-    500;
-
-  white-space:
-    nowrap;
-
-  cursor:
-    pointer;
-
-  transition:
-    background .25s ease,
-    color .25s ease,
-    border-color .25s ease,
-    transform .25s ease,
-    box-shadow .25s ease;
+.category-pill-item {
+  flex: 0 0 auto;
+  padding: 0.45rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-
-.category-button:hover {
-  color:
-    white;
-
-  border-color:
-    rgba(255, 255, 255, .22);
-
-  background:
-    rgba(255, 255, 255, .07);
-
-  transform:
-    translateY(-1px);
+.category-pill-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-
-.category-button.active {
-  background:
-    var(--primary);
-
-  color:
-    #050505;
-
-  border-color:
-    var(--primary);
-
-  font-weight:
-    600;
-
-  box-shadow:
-    0 5px 16px
-    rgba(212, 177, 106, .12);
+.category-pill-item.active {
+  background: var(--primary);
+  color: #050505;
+  border-color: var(--primary);
+  font-weight: 600;
 }
 
-
-/* =========================================
-   BOTONES SCROLL
-========================================= */
-
-.category-scroll-button {
+.scroll-control-btn {
   position: absolute;
-
   z-index: 5;
-
-  width:
-    38px;
-
-  height:
-    38px;
-
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  font-size: 0.9rem;
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, .14);
-
-  border-radius:
-    50%;
-
-  background:
-    rgba(7, 11, 20, .92);
-
-  backdrop-filter:
-    blur(10px);
-
-  color:
-    var(--text);
-
-  font-size:
-    1rem;
-
-  cursor:
-    pointer;
-
-  box-shadow:
-    0 8px 25px
-    rgba(0, 0, 0, .30);
-
-  transition:
-    background .25s ease,
-    border-color .25s ease,
-    color .25s ease,
-    transform .25s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
 
+.scroll-control-btn.left { left: -10px; }
+.scroll-control-btn.right { right: -10px; }
 
-.category-scroll-button:hover {
-  background:
-    var(--primary);
-
-  border-color:
-    var(--primary);
-
-  color:
-    #050505;
-
-  transform:
-    scale(1.05);
+/* Widget de precio dentro del panel */
+.price-widget-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-
-.category-scroll-button.left {
-  left: 0;
+.price-box-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-
-.category-scroll-button.right {
-  right: 0;
+.separator-dash {
+  color: rgba(255, 255, 255, 0.3);
 }
 
+.dual-track-inputs-container {
+  position: relative;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
 
-/* =========================================
-   SOMBRAS CATEGORÍAS
-========================================= */
-
-.category-filter-wrapper::before,
-.category-filter-wrapper::after {
-  content: '';
-
+.background-base-line {
   position: absolute;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
 
+.active-range-highlight {
+  position: absolute;
   top: 0;
-
-  bottom: 5px;
-
-  width:
-    50px;
-
-  z-index: 3;
-
-  pointer-events:
-    none;
+  bottom: 0;
+  background: var(--primary);
+  border-radius: 999px;
 }
 
-
-.category-filter-wrapper::before {
-  left: 0;
-
-  background:
-    linear-gradient(
-      to right,
-      var(--background),
-      transparent
-    );
+.custom-range-slider {
+  position: absolute;
+  width: 100%;
+  appearance: none;
+  background: none;
+  pointer-events: none;
+  margin: 0;
 }
 
-
-.category-filter-wrapper::after {
-  right: 0;
-
-  background:
-    linear-gradient(
-      to left,
-      var(--background),
-      transparent
-    );
+.custom-range-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid #111;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
 }
 
+.min-range { z-index: 2; }
+.max-range { z-index: 3; }
+
+.global-reset-inline {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  opacity: 0.9;
+}
+
+.global-reset-inline:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.filters-right-group {
+  display: flex;
+  align-items: center;
+}
+
+.products-count-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
 
 /* =========================================
-   FILTRO PRECIO
+   ESTADOS VACÍOS Y PAGINACIÓN
 ========================================= */
-
-.price-filter {
-  width:
-    min(720px, 100%);
-
-  margin-left:
-    0;
-
-  padding:
-    17px 22px 20px;
-
-  box-sizing:
-    border-box;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, .08);
-
-  border-radius:
-    16px;
-
-  background:
-    rgba(255, 255, 255, .025);
-
-  backdrop-filter:
-    blur(10px);
-
-  box-shadow:
-    0 12px 35px
-    rgba(0, 0, 0, .12);
+.catalog-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
 }
 
-
-/* =========================================
-   HEADER PRECIO
-========================================= */
-
-.price-filter-header {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    space-between;
-
-  gap:
-    20px;
-
-  min-height:
-    30px;
-
-  margin-bottom:
-    10px;
+.empty-results-container {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: rgba(255, 255, 255, 0.012);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  max-width: 520px;
+  margin: 3rem auto;
 }
 
-
-/* =========================================
-   LABEL PRECIO
-========================================= */
-
-.price-filter-label {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    9px;
-
-  color:
-    var(--text);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .82rem;
-
-  font-weight:
-    600;
-
-  white-space:
-    nowrap;
+.empty-state-icon {
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
 }
 
-
-.price-filter-icon {
-  width:
-    24px;
-
-  height:
-    24px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  border-radius:
-    7px;
-
-  background:
-    rgba(212, 177, 106, .12);
-
-  color:
-    var(--primary);
-
-  font-size:
-    .72rem;
-
-  font-weight:
-    700;
+.empty-results-container h3 {
+  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
-
-/* =========================================
-   ACCIONES PRECIO
-========================================= */
-
-.price-filter-actions {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    10px;
-
-  margin-left:
-    auto;
+.empty-results-container p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 1.75rem;
 }
 
-
-/* =========================================
-   RANGO TEXTO
-========================================= */
-
-.price-range-text {
-  color:
-    var(--text-secondary);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .76rem;
-
-  font-weight:
-    500;
-
-  white-space:
-    nowrap;
+.empty-reset-action {
+  padding: 0.7rem 1.5rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 10px;
+  color: #050505;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-
-.price-separator {
-  margin:
-    0 5px;
-
-  color:
-    rgba(255, 255, 255, .30);
+.empty-reset-action:hover {
+  transform: translateY(-2px);
 }
 
-
-/* =========================================
-   BOTÓN LIMPIAR
-========================================= */
-
-.clear-price-button {
-  padding:
-    5px 10px;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, .10);
-
-  border-radius:
-    7px;
-
-  background:
-    transparent;
-
-  color:
-    var(--text-secondary);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .68rem;
-
-  cursor:
-    pointer;
-
-  transition:
-    color .2s ease,
-    border-color .2s ease,
-    background .2s ease;
+.catalog-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-
-.clear-price-button:hover {
-  color:
-    var(--text);
-
-  border-color:
-    var(--primary);
-
-  background:
-    rgba(212, 177, 106, .07);
+.page-numbers-wrapper {
+  display: flex;
+  gap: 0.5rem;
 }
 
-
-/* =========================================
-   SLIDER
-========================================= */
-
-.price-slider-container {
-  position:
-    relative;
-
-  width:
-    100%;
-
-  height:
-    24px;
+.page-number-pill, .page-nav-arrow {
+  padding: 0.6rem 1.1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-
-.price-slider-track {
-  position:
-    absolute;
-
-  top:
-    50%;
-
-  left:
-    0;
-
-  right:
-    0;
-
-  height:
-    4px;
-
-  transform:
-    translateY(-50%);
-
-  border-radius:
-    999px;
-
-  background:
-    rgba(255, 255, 255, .10);
+.page-number-pill.active {
+  background: var(--primary);
+  color: #050505;
+  border-color: var(--primary);
+  font-weight: 600;
 }
 
-
-.price-slider-selected {
-  position:
-    absolute;
-
-  top:
-    0;
-
-  bottom:
-    0;
-
-  border-radius:
-    999px;
-
-  background:
-    var(--primary);
-
-  box-shadow:
-    0 0 10px
-    rgba(212, 177, 106, .16);
+.page-number-pill:hover:not(.active), .page-nav-arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
 }
 
-
-.price-range {
-  position:
-    absolute;
-
-  top:
-    0;
-
-  left:
-    0;
-
-  width:
-    100%;
-
-  height:
-    24px;
-
-  margin:
-    0;
-
-  appearance:
-    none;
-
-  -webkit-appearance:
-    none;
-
-  background:
-    transparent;
-
-  pointer-events:
-    none;
-
-  outline:
-    none;
+.page-nav-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
-
-
-/* =========================================
-   THUMB CHROME
-========================================= */
-
-.price-range::-webkit-slider-thumb {
-  appearance:
-    none;
-
-  -webkit-appearance:
-    none;
-
-  width:
-    17px;
-
-  height:
-    17px;
-
-  border:
-    2px solid
-    var(--background);
-
-  border-radius:
-    50%;
-
-  background:
-    var(--primary);
-
-  box-shadow:
-    0 2px 8px
-    rgba(0, 0, 0, .35);
-
-  cursor:
-    grab;
-
-  pointer-events:
-    auto;
-
-  transition:
-    transform .15s ease;
-}
-
-
-.price-range::-webkit-slider-thumb:hover {
-  transform:
-    scale(1.12);
-}
-
-
-.price-range::-webkit-slider-thumb:active {
-  cursor:
-    grabbing;
-
-  transform:
-    scale(1.08);
-}
-
-
-/* =========================================
-   THUMB FIREFOX
-========================================= */
-
-.price-range::-moz-range-thumb {
-  width:
-    17px;
-
-  height:
-    17px;
-
-  border:
-    2px solid
-    var(--background);
-
-  border-radius:
-    50%;
-
-  background:
-    var(--primary);
-
-  box-shadow:
-    0 2px 8px
-    rgba(0, 0, 0, .35);
-
-  cursor:
-    grab;
-
-  pointer-events:
-    auto;
-}
-
-
-.price-range::-moz-range-track {
-  background:
-    transparent;
-}
-
-
-.price-range-min {
-  z-index:
-    2;
-}
-
-
-.price-range-max {
-  z-index:
-    3;
-}
-
-
-/* =========================================
-   LOADING
-========================================= */
-
-.catalog-loading {
-  display:
-    grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap:
-    28px;
-
-  width:
-    min(1120px, 100%);
-
-  margin:
-    0 auto;
-}
-
-
-/* =========================================
-   SIN RESULTADOS
-========================================= */
-
-.empty-products {
-  width:
-    min(600px, 100%);
-
-  margin:
-    3rem auto 0;
-
-  padding:
-    40px 30px;
-
-  display:
-    flex;
-
-  flex-direction:
-    column;
-
-  align-items:
-    center;
-
-  text-align:
-    center;
-
-  border:
-    1px dashed
-    var(--border);
-
-  border-radius:
-    16px;
-
-  background:
-    rgba(255, 255, 255, .02);
-}
-
-
-.empty-products-icon {
-  width:
-    50px;
-
-  height:
-    50px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  margin-bottom:
-    15px;
-
-  border-radius:
-    14px;
-
-  background:
-    var(--surface-light);
-
-  color:
-    var(--primary);
-
-  font-size:
-    20px;
-}
-
-
-.empty-products h3 {
-  margin:
-    0;
-
-  color:
-    var(--text);
-
-  font-family:
-    var(--font-title);
-
-  font-size:
-    24px;
-
-  font-weight:
-    500;
-}
-
-
-.empty-products p {
-  margin:
-    7px 0 18px;
-
-  color:
-    var(--text-secondary);
-
-  font-size:
-    12px;
-
-  line-height:
-    1.5;
-}
-
-
-.empty-clear-button {
-  padding:
-    9px 15px;
-
-  border:
-    1px solid
-    var(--border);
-
-  border-radius:
-    9px;
-
-  background:
-    transparent;
-
-  color:
-    var(--text-secondary);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .75rem;
-
-  cursor:
-    pointer;
-
-  transition:
-    all .2s ease;
-}
-
-
-.empty-clear-button:hover {
-  color:
-    #050505;
-
-  border-color:
-    var(--primary);
-
-  background:
-    var(--primary);
-}
-
-
-/* =========================================
-   PAGINACIÓN
-========================================= */
-
-.pagination {
-  display:
-    flex;
-
-  justify-content:
-    center;
-
-  align-items:
-    center;
-
-  gap:
-    12px;
-
-  width:
-    min(1120px, 100%);
-
-  margin:
-    4rem auto 0;
-
-  padding-top:
-    2rem;
-
-  border-top:
-    1px solid
-    rgba(255, 255, 255, .06);
-}
-
-
-.pagination-pages {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    8px;
-}
-
-
-.pagination-button {
-  width:
-    44px;
-
-  height:
-    44px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  border-radius:
-    12px;
-
-  border:
-    1px solid
-    rgba(255, 255, 255, .10);
-
-  background:
-    rgba(255, 255, 255, .025);
-
-  color:
-    var(--text-secondary);
-
-  font-family:
-    var(--font-body);
-
-  font-size:
-    .95rem;
-
-  font-weight:
-    500;
-
-  cursor:
-    pointer;
-
-  transition:
-    background .25s ease,
-    color .25s ease,
-    border-color .25s ease,
-    transform .25s ease,
-    box-shadow .25s ease;
-}
-
-
-.pagination-button:hover:not(:disabled) {
-  background:
-    rgba(255, 255, 255, .08);
-
-  color:
-    white;
-
-  border-color:
-    rgba(255, 255, 255, .20);
-
-  transform:
-    translateY(-2px);
-
-  box-shadow:
-    0 8px 24px
-    rgba(0, 0, 0, .25);
-}
-
-
-.pagination-button.active {
-  background:
-    rgba(255, 255, 255, .92);
-
-  color:
-    #050505;
-
-  border-color:
-    rgba(255, 255, 255, .95);
-
-  box-shadow:
-    0 8px 25px
-    rgba(255, 255, 255, .10);
-}
-
-
-.pagination-button.arrow {
-  font-size:
-    1.25rem;
-
-  font-weight:
-    400;
-}
-
-
-.pagination-button:disabled {
-  opacity:
-    .25;
-
-  cursor:
-    not-allowed;
-
-  transform:
-    none;
-
-  box-shadow:
-    none;
-}
-
-
-/* =========================================
-   TABLET
-========================================= */
-
-@media (max-width: 1100px) {
-
-  .catalog-loading {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-}
-
-
-/* =========================================
-   TABLET PEQUEÑA
-========================================= */
-
-@media (max-width: 800px) {
-
-  .category-scroll-button {
-    display:
-      none;
-  }
-
-  .category-filter-wrapper::before,
-  .category-filter-wrapper::after {
-    display:
-      none;
-  }
-
-  .category-filter {
-    padding-left:
-      2px;
-
-    padding-right:
-      2px;
-  }
-
-  .price-filter {
-    width:
-      100%;
-  }
-
-}
-
-
-/* =========================================
-   MÓVIL
-========================================= */
-
-@media (max-width: 700px) {
-
-  .section {
-    padding:
-      7rem 0;
-  }
-
-
-  .catalog-filters {
-    margin-bottom:
-      2.5rem;
-  }
-
-
-  .category-filter-wrapper {
-    margin-bottom:
-      14px;
-  }
-
-
-  .category-filter {
-    gap:
-      8px;
-
-    padding:
-      4px 2px 8px;
-  }
-
-
-  .category-button {
-    padding:
-      9px 15px;
-
-    font-size:
-      .80rem;
-  }
-
-
-  /* -----------------------------
-     PRECIO
-  ----------------------------- */
-
-  .price-filter {
-    width:
-      100%;
-
-    padding:
-      15px 16px 17px;
-
-    border-radius:
-      14px;
-  }
-
-
-  .price-filter-header {
-    align-items:
-      flex-start;
-
-    flex-direction:
-      column;
-
-    gap:
-      9px;
-
-    margin-bottom:
-      8px;
-  }
-
-
-  .price-filter-actions {
-    width:
-      100%;
-
-    justify-content:
-      space-between;
-
-    margin-left:
-      0;
-  }
-
-
-  .price-range-text {
-    font-size:
-      .72rem;
-  }
-
-
-  .clear-price-button {
-    font-size:
-      .68rem;
-  }
-
-
-  .price-slider-container {
-    margin-top:
-      2px;
-  }
-
-
-  /* -----------------------------
-     LOADING
-  ----------------------------- */
-
-  .catalog-loading {
-    grid-template-columns:
-      1fr;
-
-    gap:
-      24px;
-  }
-
-
-  /* -----------------------------
-     PAGINACIÓN
-  ----------------------------- */
-
-  .pagination {
-    gap:
-      8px;
-
-    margin-top:
-      3rem;
-  }
-
-
-  .pagination-pages {
-    gap:
-      5px;
-  }
-
-
-  .pagination-button {
-    width:
-      40px;
-
-    height:
-      40px;
-
-    border-radius:
-      10px;
-  }
-
-}
-
-
-/* =========================================
-   MÓVIL PEQUEÑO
-========================================= */
-
-@media (max-width: 420px) {
-
-  .category-filter {
-    gap:
-      7px;
-  }
-
-
-  .category-button {
-    padding:
-      8px 13px;
-  }
-
-
-  .price-filter {
-    padding:
-      14px 14px 16px;
-  }
-
-
-  .price-range-text {
-    font-size:
-      .68rem;
-  }
-
-}
-
 </style>
