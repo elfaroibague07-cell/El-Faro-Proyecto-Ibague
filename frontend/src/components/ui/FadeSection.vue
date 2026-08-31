@@ -1,91 +1,51 @@
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 
-import {ref,onMounted,onUnmounted} from 'vue'
+const visible = ref(false)
+const element = ref<HTMLElement>()
+let observer: IntersectionObserver
 
-const visible=ref(false)
-
-const element=ref<HTMLElement>()
-
-let observer:IntersectionObserver
-
-onMounted(()=>{
-
-observer=new IntersectionObserver(
-
-([entry])=>{
-
-if(entry.isIntersecting){
-
-visible.value=true
-
-}
-
-},
-
-{
-
-threshold:.15
-
-}
-
-)
-
-if(element.value){
-
-observer.observe(element.value)
-
-}
-
+onMounted(() => {
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        visible.value = true
+      }
+    },
+    {
+      threshold: .15
+    }
+  )
+  if (element.value) {
+    observer.observe(element.value)
+  }
 })
 
-onUnmounted(()=>{
-
-observer.disconnect()
-
+onUnmounted(() => {
+  observer.disconnect()
 })
-
 </script>
 
 <template>
-
-<section
-
-ref="element"
-
-:class="{
-
-visible
-
-}"
-
-class="fade"
-
->
-
-<slot/>
-
-</section>
-
+  <div
+    ref="element"
+    :class="{ visible }"
+    class="fade"
+  >
+    <slot />
+  </div>
 </template>
 
 <style scoped>
-
-.fade{
-
-opacity:0;
-
-transform:translateY(50px);
-
-transition:.8s;
-
+.fade {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  will-change: opacity, transform;
 }
 
-.visible{
-
-opacity:1;
-
-transform:translateY(0);
-
+.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
-
 </style>

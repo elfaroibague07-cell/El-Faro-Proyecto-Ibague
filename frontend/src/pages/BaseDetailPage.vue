@@ -1,18 +1,24 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { getBaseBySlug } from '../services/base.service' // O la ruta de tu servicio
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
+import { getBaseBySlug } from '../services/base.service'
+import ProductBreadcrumb from '../components/admin/products/ProductBreadcrumb.vue'
+import Navbar from '../components/layout/Navbar.vue'
+import FadeSection from '../components/ui/FadeSection.vue'
 
 const route = useRoute()
-const base = ref(null)
+const base = ref<any>(null)
 const loading = ref(true)
-const error = ref(null)
+const error = ref<string | null>(null)
 
 async function loadBaseDetail() {
   try {
     loading.value = true
-    const baseSlug = route.params.slug
+    const baseSlug = route.params.slug as string
     base.value = await getBaseBySlug(baseSlug)
+    if (base.value) {
+      document.title = `${base.value.name} | El Faro`
+    }
   } catch (err) {
     console.error('Error al cargar el detalle de la base:', err)
     error.value = 'No se pudo cargar la información de la base.'
@@ -24,179 +30,189 @@ async function loadBaseDetail() {
 onMounted(() => {
   loadBaseDetail()
 })
+
+const whatsappLink = computed(() => {
+  if (!base.value) return '#'
+  const message = `Hola.\n\nEstoy interesado en la base:\n\n${base.value.name}\n\n${window.location.href}`
+  return `https://wa.me/573103456789?text=${encodeURIComponent(message)}`
+})
 </script>
 
 <template>
-  <main class="product-detail-page">
-    <div v-if="loading" class="state-message">Cargando producto...</div>
-    <div v-else-if="error" class="state-message error">{{ error }}</div>
+  <Navbar />
 
-    <div v-else-if="base" class="product-container">
-      <!-- Breadcrumb igual al de tus productos -->
-      <nav class="breadcrumb">
-        <router-link to="/">Inicio</router-link> / 
-        <router-link to="/catalogo/bases">Catálogo</router-link> / 
-        <span>{{ base.name }}</span>
-      </nav>
+  <section class="base-detail-page">
+    <div class="container">
+      <div v-if="loading" class="loading">
+        <h2>Cargando base...</h2>
+      </div>
 
-      <div class="product-grid">
-        <!-- Imagen grande -->
-        <div class="product-image-wrapper">
-          <img :src="base.image_url" :alt="base.name" class="product-image" />
-        </div>
+      <div v-else-if="error" class="not-found">
+        <h2>{{ error }}</h2>
+        <RouterLink to="/" class="button">Volver al catálogo</RouterLink>
+      </div>
 
-        <!-- Información y acciones -->
-        <div class="product-info">
-          <span class="badge">Producto destacado</span>
-          <h1>{{ base.name }}</h1>
-          
-          <!-- Si manejas precio en las bases, colócalo aquí, o adáptalo -->
-          <div class="product-price">$ 220.000</div>
+      <template v-else-if="base">
+        <ProductBreadcrumb :product-name="base.name" />
 
-          <p class="product-description">
-            {{ base.description }}
-          </p>
-
-          <div class="product-options">
-            <div class="option-box">Material</div>
-            <div class="option-box">Tamaño</div>
+        <div class="base-layout">
+          <div class="image-column">
+            <img :src="base.image_url" :alt="base.name" class="image" loading="eager" />
           </div>
 
-          <button type="button" class="btn-submit">
-            Solicitar información
-          </button>
+          <div class="info-column">
+            <span class="badge">Producto destacado</span>
+            <h1>{{ base.name }}</h1>
+            
+            <div class="price">$ 220.000</div>
+
+            <p class="description">
+              {{ base.description }}
+            </p>
+
+            <div class="specs">
+              <div class="spec">
+                <strong>Material</strong>
+                <span>Cristal óptico premium</span>
+              </div>
+              <div class="spec">
+                <strong>Tamaño</strong>
+                <span>Estándar</span>
+              </div>
+            </div>
+
+            <a :href="whatsappLink" target="_blank" class="button">
+              Solicitar por WhatsApp
+            </a>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
-  </main>
+  </section>
 </template>
 
 <style scoped>
-.product-detail-page {
-  width: 100%;
-  min-height: 100vh;
-  padding: 120px 40px 100px;
-  background: #08090a;
-  color: #ffffff;
+.base-detail-page {
+  padding: 120px 0 80px;
+  /* Eliminamos min-height: 100vh para que la página fluya de forma natural con el contenido y no fuerce saltos de altura */
+  background-color: var(--background);
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
 }
 
-.product-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.container {
+  width: min(1200px, 92%);
+  margin: auto;
 }
 
-.breadcrumb {
-  margin-bottom: 40px;
-  color: #8d8d8d;
-  font-size: 0.85rem;
+.loading, .not-found {
+  text-align: center;
+  padding: 100px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 
-.breadcrumb a {
-  color: #8d8d8d;
-  text-decoration: none;
-}
-
-.breadcrumb a:hover {
-  color: #ffffff;
-}
-
-.product-grid {
+.base-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: start;
+  gap: 70px;
+  align-items: center;
+  margin-bottom: 70px;
 }
 
-.product-image-wrapper {
+.image {
   width: 100%;
   aspect-ratio: 1;
-  background: #111214;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-}
-
-.product-info h1 {
-  margin: 15px 0 20px;
-  font-size: clamp(2rem, 3vw, 3rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 60px rgba(0,0,0,.12);
 }
 
 .badge {
   display: inline-block;
   padding: 6px 14px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border);
   border-radius: 20px;
   font-size: 0.75rem;
+  margin-bottom: 15px;
 }
 
-.product-price {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #ffffff;
+h1 {
+  font-size: 3rem;
+  line-height: 1.1;
+  margin-bottom: 18px;
 }
 
-.product-description {
-  color: #999999;
-  line-height: 1.6;
-  margin-bottom: 30px;
-  font-size: 0.95rem;
+.price {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 28px 0;
 }
 
-.product-options {
+.specs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin: 35px 0;
 }
 
-.option-box {
-  padding: 16px;
-  background: #111214;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  color: #8d8d8d;
-  font-size: 0.9rem;
+.spec {
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, .03);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-secondary);
 }
 
-.btn-submit {
+.spec strong {
+  color: var(--text);
+}
+
+.description {
+  line-height: 1.9;
+  margin-bottom: 35px;
+  color: var(--text-secondary);
+}
+
+.button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  padding: 16px;
-  background: #f0f0f0;
-  color: #08090a;
-  border: none;
-  border-radius: 12px;
+  padding: 16px 28px;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #000000;
+  text-decoration: none;
   font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: .3s;
 }
 
-.btn-submit:hover {
-  background: #ffffff;
+.button:hover {
+  transform: translateY(-3px);
+  background: var(--primary-hover);
 }
 
-.state-message {
-  text-align: center;
-  padding: 100px;
-  color: #8d8d8d;
-}
-
-@media (max-width: 768px) {
-  .product-grid {
+@media(max-width: 900px) {
+  .base-layout {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 45px;
   }
-  .product-detail-page {
-    padding: 90px 20px 60px;
+  .specs {
+    grid-template-columns: 1fr;
+  }
+  h1 {
+    font-size: 2.2rem;
   }
 }
 </style>

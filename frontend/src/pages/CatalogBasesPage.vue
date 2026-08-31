@@ -79,74 +79,55 @@ onMounted(() => {
 <style scoped>
 .catalog-bases-page {
   width: 100%;
-  min-height: 100vh;
-
+  /* Cambiamos min-height por height natural para que no estire de más y trunque el fondo */
   padding: 120px 40px 100px;
 
-  background: #08090a;
-  color: #ffffff;
-
-  overflow: hidden;
+  /* Sincronizamos con la variable global de tu tema en lugar de un color fijo */
+  background: var(--background);
+  color: var(--text, #ffffff);
 }
 
 .catalog-bases-header {
   width: 100%;
   max-width: 900px;
-
   margin: 0 auto;
-
   text-align: center;
 }
 
 .eyebrow {
   margin: 0 0 22px;
-
   color: #8d8d8d;
-
   font-size: 0.72rem;
   font-weight: 600;
-
   letter-spacing: 0.35em;
 }
 
 .catalog-bases-header h1 {
   margin: 0;
-
   color: #ffffff;
-
   font-size: clamp(2.6rem, 5vw, 5rem);
-
   font-weight: 500;
-
   line-height: 1.05;
-
   letter-spacing: -0.04em;
 }
 
 .subtitle {
   max-width: 620px;
-
   margin: 26px auto 0;
-
   color: #999999;
-
   font-size: 1rem;
-
   line-height: 1.7;
 }
 
 .catalog-bases-carousel {
   width: 100%;
   max-width: 1400px;
-
   margin: 70px auto 0;
 }
 
 .state-message {
   padding: 80px 20px;
-
   text-align: center;
-
   color: #999999;
 }
 
