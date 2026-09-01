@@ -62,7 +62,7 @@ onUnmounted(() => {
       </RouterLink>
 
       <!-- NUEVA RUTA DE BASES -->
-      <RouterLink to="/catalogo/bases">
+      <RouterLink to="/#bases">
         Bases
       </RouterLink>
 
@@ -125,7 +125,7 @@ onUnmounted(() => {
 
       <!-- NUEVA RUTA DE BASES MOBILE -->
       <RouterLink
-        to="/catalogo/bases"
+        to="/#bases"
         @click="closeMenu"
       >
         Bases

@@ -29,7 +29,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="catalog-bases-page">
+  <main id="bases" class="catalog-bases-page">
 
     <section class="catalog-bases-header">
 
