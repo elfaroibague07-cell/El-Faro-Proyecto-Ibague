@@ -49,37 +49,29 @@ onUnmounted(() => {
 
     <!-- NAVEGACIÓN DESKTOP -->
     <nav class="desktop-nav">
-      <RouterLink to="/">
-        Inicio
+      <RouterLink to="/" class="nav-link">
+        <span>Inicio</span>
       </RouterLink>
 
-      <RouterLink to="/#about">
-        Nosotros
+      <RouterLink to="/#about" class="nav-link">
+        <span>Nosotros</span>
       </RouterLink>
 
-      <RouterLink to="/#catalog">
-        Catálogo
+      <RouterLink to="/#catalog" class="nav-link">
+        <span>Catálogo</span>
       </RouterLink>
 
-      <!-- NUEVA RUTA DE BASES -->
-      <RouterLink to="/#bases">
-        Bases
+      <RouterLink to="/#bases" class="nav-link">
+        <span>Bases</span>
       </RouterLink>
 
-      <RouterLink to="/#footer">
-        Contacto
+      <RouterLink to="/#footer" class="nav-link">
+        <span>Contacto</span>
       </RouterLink>
     </nav>
 
-    <!-- WHATSAPP DESKTOP -->
-    <a
-      href="https://wa.me/message/CUNW7BLC4EKKP1"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="contact-btn"
-    >
-      WhatsApp
-    </a>
+    <!-- ESPACIADOR EQUILIBRADOR -->
+    <div class="navbar-spacer"></div>
 
     <!-- BOTÓN MOBILE -->
     <button
@@ -102,51 +94,11 @@ onUnmounted(() => {
       v-if="menuOpen"
       class="mobile-menu"
     >
-      <RouterLink
-        to="/"
-        @click="closeMenu"
-      >
-        Inicio
-      </RouterLink>
-
-      <RouterLink
-        to="/#about"
-        @click="closeMenu"
-      >
-        Nosotros
-      </RouterLink>
-
-      <RouterLink
-        to="/#catalog"
-        @click="closeMenu"
-      >
-        Catálogo
-      </RouterLink>
-
-      <!-- NUEVA RUTA DE BASES MOBILE -->
-      <RouterLink
-        to="/#bases"
-        @click="closeMenu"
-      >
-        Bases
-      </RouterLink>
-
-      <RouterLink
-        to="/#footer"
-        @click="closeMenu"
-      >
-        Contacto
-      </RouterLink>
-
-      <a
-        href="https://wa.me/message/CUNW7BLC4EKKP1"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="mobile-whatsapp"
-        @click="closeMenu"
-      >
-        WhatsApp
-      </a>
+      <RouterLink to="/" @click="closeMenu">Inicio</RouterLink>
+      <RouterLink to="/#about" @click="closeMenu">Nosotros</RouterLink>
+      <RouterLink to="/#catalog" @click="closeMenu">Catálogo</RouterLink>
+      <RouterLink to="/#bases" @click="closeMenu">Bases</RouterLink>
+      <RouterLink to="/#footer" @click="closeMenu">Contacto</RouterLink>
     </div>
   </transition>
 </header>
@@ -154,27 +106,31 @@ onUnmounted(() => {
 
 <style scoped>
 /* =====================================================
-   NAVBAR
+   NAVBAR GENERAL (Más alto para mejor presencia)
 ===================================================== */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 102px;
+  height: 116px;
   display: flex;
   align-items: center;
   z-index: 1000;
-  background: #0B0B0B;
-  backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255,255,255,.05);
-  transition: background .35s ease, backdrop-filter .35s ease, border-color .35s ease;
+  background: linear-gradient(to bottom, rgba(11, 11, 11, 0.96), rgba(11, 11, 11, 0.25));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .navbar.scrolled {
-  background: rgba(0,0,0,.92);
-  backdrop-filter: blur(22px);
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  height: 94px;
+  background: rgba(8, 8, 8, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
 }
 
 /* =====================================================
@@ -186,7 +142,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  padding: 0 48px;
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
 }
 
 /* =====================================================
@@ -195,135 +154,83 @@ onUnmounted(() => {
 .logo {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-shrink: 0;
-  width: auto;
-  height: 100%;
+  text-decoration: none;
+  z-index: 2;
 }
 
 .logo-image {
   display: block;
   width: auto;
-  height: 108px;
-  max-width: 180px;
+  height: 86px;
+  max-width: 210px;
   object-fit: contain;
   user-select: none;
-  transition: transform .35s ease, filter .35s ease;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.06));
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7));
 }
 
 .logo:hover .logo-image {
-  transform: scale(1.04);
-  filter: drop-shadow(0 0 20px rgba(255,255,255,.12));
+  transform: scale(1.03);
 }
 
 /* =====================================================
-   NAVEGACIÓN
+   NAVEGACIÓN DESKTOP
 ===================================================== */
 .desktop-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 14px;
-  flex: 1;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px 12px;
+  border-radius: 99px;
+  backdrop-filter: blur(12px);
 }
 
-/* =====================================================
-   BOTONES DE NAVEGACIÓN
-===================================================== */
-.desktop-nav a {
+.nav-link {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 48px;
-  padding: 0 20px;
-  border-radius: 15px;
-  background: rgba(255,255,255,.025);
-  border: 1px solid rgba(255,255,255,.06);
-  backdrop-filter: blur(12px);
-  color: var(--text-secondary);
-  font-size: .95rem;
-  font-weight: 500;
-  letter-spacing: .2px;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 99px;
+  color: #b3b3b3;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.4px;
   text-decoration: none;
   white-space: nowrap;
-  overflow: hidden;
-  transition: color .3s ease, background .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Brillo */
-.desktop-nav a::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -120%;
-  width: 70%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
-  transform: skewX(-20deg);
-  transition: left .65s ease;
+.nav-link span {
+  position: relative;
+  z-index: 2;
+  transition: color 0.3s ease;
 }
 
-/* Línea inferior */
-.desktop-nav a::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 7px;
-  width: 0;
-  height: 2px;
-  border-radius: 50px;
-  background: var(--primary);
-  transform: translateX(-50%);
-  transition: width .3s ease;
+.nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.09);
 }
 
-/* Hover */
-.desktop-nav a:hover {
-  color: white;
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.13);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(255,255,255,.04), 0 0 20px rgba(255,255,255,.03);
+.nav-link:active {
+  transform: scale(0.97);
 }
 
-.desktop-nav a:hover::before {
-  left: 140%;
-}
-
-.desktop-nav a:hover::after {
-  width: 55%;
-}
-
-/* =====================================================
-   WHATSAPP
-===================================================== */
-.contact-btn {
+.navbar-spacer {
+  width: 190px;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 50px;
-  padding: 0 26px;
-  border-radius: 15px;
-  background: white;
-  color: black;
-  font-size: .94rem;
-  font-weight: 700;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: transform .3s ease, background .3s ease, box-shadow .3s ease;
-}
-
-.contact-btn:hover {
-  background: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(255,255,255,.12);
 }
 
 /* =====================================================
-   HAMBURGUESA
+   HAMBURGUESA MOBILE
 ===================================================== */
 .menu-button {
   display: none;
@@ -331,28 +238,26 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   padding: 0;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 13px;
-  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
+  z-index: 2;
 }
 
 .menu-button span {
   display: block;
   width: 20px;
   height: 2px;
-  border-radius: 20px;
+  border-radius: 2px;
   background: white;
-  transition: transform .3s ease, opacity .3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* =====================================================
-   HAMBURGUESA ACTIVA
-===================================================== */
 .menu-button.active span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -366,99 +271,29 @@ onUnmounted(() => {
 }
 
 /* =====================================================
-   TABLET
+   MEDIA QUERIES (RESPONSIVE)
 ===================================================== */
-@media (max-width: 1100px) {
-  .navbar-container {
-    gap: 14px;
-  }
-  .logo-image {
-    height: 88px;
-    max-width: 145px;
-  }
-  .desktop-nav {
-    gap: 8px;
-  }
-  .desktop-nav a {
-    height: 44px;
-    padding: 0 13px;
-    font-size: .88rem;
-  }
-  .contact-btn {
-    height: 46px;
-    padding: 0 18px;
-    font-size: .88rem;
-  }
-}
-
-/* =====================================================
-   TABLET PEQUEÑA
-===================================================== */
-@media (max-width: 900px) {
-  .navbar {
-    height: 82px;
-  }
+@media (max-width: 960px) {
   .navbar-container {
     padding: 0 20px;
-    gap: 0;
-  }
-  .logo-image {
-    height: 74px;
-    max-width: 125px;
   }
   .desktop-nav {
     display: none;
   }
-  .contact-btn {
+  .navbar-spacer {
     display: none;
   }
   .menu-button {
     display: flex;
   }
-}
-
-/* =====================================================
-   MÓVIL
-===================================================== */
-@media (max-width: 600px) {
-  .navbar {
-    height: 76px;
-  }
-  .navbar-container {
-    padding: 0 16px;
-  }
   .logo-image {
-    height: 66px;
-    max-width: 115px;
-  }
-  .menu-button {
-    width: 42px;
-    height: 42px;
-  }
-}
-
-/* =====================================================
-   MÓVIL PEQUEÑO
-===================================================== */
-@media (max-width: 420px) {
-  .navbar {
     height: 70px;
-  }
-  .navbar-container {
-    padding: 0 12px;
-  }
-  .logo-image {
-    height: 58px;
-    max-width: 105px;
-  }
-  .menu-button {
-    width: 40px;
-    height: 40px;
+    max-width: 160px;
   }
 }
 
 /* =====================================================
-   MENÚ MOBILE
+   MENÚ MOBILE DESPLEGABLE
 ===================================================== */
 .mobile-menu {
   position: absolute;
@@ -467,54 +302,48 @@ onUnmounted(() => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 14px 20px 20px;
-  background: rgba(8,8,8,.97);
+  gap: 10px;
+  padding: 20px 24px 28px;
+  background: rgba(10, 10, 10, 0.98);
   backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 25px 50px rgba(0,0,0,.35);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
 }
 
-/* =====================================================
-   ELEMENTOS MOBILE
-===================================================== */
 .mobile-menu a {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 50px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.07);
-  background: rgba(255,255,255,.025);
-  color: var(--text-secondary);
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  color: #cccccc;
+  font-size: 0.98rem;
+  font-weight: 400;
   text-decoration: none;
-  transition: .3s ease;
+  transition: all 0.25s ease;
 }
 
 .mobile-menu a:hover {
   color: white;
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.13);
-}
-
-.mobile-menu .mobile-whatsapp {
-  background: white;
-  color: black;
-  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* =====================================================
-   ANIMACIÓN MENÚ
+   ANIMACIÓN MENÚ MOBILE
 ===================================================== */
 .mobile-menu-enter-active,
 .mobile-menu-leave-active {
-  transition: opacity .25s ease, transform .25s ease;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-menu-enter-from,
 .mobile-menu-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-12px);
 }
 </style>
