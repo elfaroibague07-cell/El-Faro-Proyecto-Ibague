@@ -1,144 +1,32 @@
-import { supabase } from '../lib/supabase'
+import { uploadService } from './upload.service'
 
 class StorageService {
-
-  private readonly bucket = 'products'
-
+  /**
+   * Sube una imagen para la sección de productos -> el-faro/products
+   */
   async uploadProductImage(file: File): Promise<string> {
-
-    const extension = file.name.split('.').pop()
-
-    const fileName = `${crypto.randomUUID()}.${extension}`
-
-    const filePath = `products/${fileName}`
-
-    const { error } = await supabase.storage
-
-      .from(this.bucket)
-
-      .upload(filePath, file, {
-
-        cacheControl: '3600',
-
-        upsert: false
-
-      })
-
-    if (error) {
-
-      throw error
-
-    }
-
-    const {
-
-      data
-
-    } = supabase.storage
-
-      .from(this.bucket)
-
-      .getPublicUrl(filePath)
-
-    return data.publicUrl
-
+    return await uploadService.uploadImage(file, 'el-faro/products')
   }
 
-  private extractPathFromUrl(
-
-    url: string
-
-  ): string | null {
-
-    if (!url) return null
-
-    const marker = `/storage/v1/object/public/${this.bucket}/`
-
-    const index = url.indexOf(marker)
-
-    if (index === -1) {
-
-      return null
-
-    }
-
-    return decodeURIComponent(
-
-      url.substring(
-
-        index + marker.length
-
-      )
-
-    )
-
+  /**
+   * Sube una imagen para la sección de bases -> el-faro/bases
+   */
+  async uploadBaseImage(file: File): Promise<string> {
+    return await uploadService.uploadImage(file, 'el-faro/bases')
   }
 
-  async deleteProductImage(
-
-    imageUrl: string
-
-  ): Promise<void> {
-
-    const path = this.extractPathFromUrl(
-
-      imageUrl
-
-    )
-
-    if (!path) return
-
-    const { error } = await supabase.storage
-
-      .from(this.bucket)
-
-      .remove([path])
-
-    if (error) {
-
-      throw error
-
-    }
-
+  async deleteImage(_imageUrl: string): Promise<void> {
+    // Las eliminaciones en Cloudinary requieren credenciales backend privadas (Signatures).
+    // Se deja vacío para evitar errores en cliente con subidas unsigned.
   }
 
-  async replaceProductImage(
-
-    oldImage: string,
-
-    newFile: File
-
-  ): Promise<string> {
-
-    if (oldImage) {
-
-      try {
-
-        await this.deleteProductImage(
-
-          oldImage
-
-        )
-
-      }
-
-      catch {
-
-        // Si la imagen anterior no existe,
-        // continuamos normalmente.
-
-      }
-
-    }
-
-    return await this.uploadProductImage(
-
-      newFile
-
-    )
-
+  async replaceProductImage(_oldImage: string, newFile: File): Promise<string> {
+    return await this.uploadProductImage(newFile)
   }
 
+  async replaceBaseImage(_oldImage: string, newFile: File): Promise<string> {
+    return await this.uploadBaseImage(newFile)
+  }
 }
 
 export default new StorageService()

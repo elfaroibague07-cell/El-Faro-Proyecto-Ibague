@@ -46,7 +46,12 @@ const router = createRouter({
       path: '/catalogo/bases/:slug',
       name: 'base-detalle',
       component: () => import('@/pages/BaseDetailPage.vue')
-    }
+    },
+    {
+      path: '/admin/bases',
+      name: 'admin-bases',
+      component: () => import('@/pages/admin/BasesPage.vue')
+    },
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {

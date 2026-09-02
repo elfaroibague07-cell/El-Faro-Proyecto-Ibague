@@ -4,7 +4,6 @@ import { useRoute, RouterLink } from 'vue-router'
 import { getBaseBySlug } from '../services/base.service'
 import ProductBreadcrumb from '../components/admin/products/ProductBreadcrumb.vue'
 import Navbar from '../components/layout/Navbar.vue'
-import FadeSection from '../components/ui/FadeSection.vue'
 
 const route = useRoute()
 const base = ref<any>(null)
@@ -53,7 +52,7 @@ const whatsappLink = computed(() => {
       </div>
 
       <template v-else-if="base">
-        <ProductBreadcrumb :product-name="base.name" />
+        <ProductBreadcrumb :title="base.name" :product-name="base.name" />
 
         <div class="base-layout">
           <div class="image-column">
@@ -61,10 +60,10 @@ const whatsappLink = computed(() => {
           </div>
 
           <div class="info-column">
-            <span class="badge">Producto destacado</span>
+            <span v-if="base.featured" class="badge">Producto destacado</span>
             <h1>{{ base.name }}</h1>
             
-            <div class="price">$ 220.000</div>
+            <div class="price">$ {{ base.price?.toLocaleString() ?? 0 }}</div>
 
             <p class="description">
               {{ base.description }}
@@ -94,7 +93,6 @@ const whatsappLink = computed(() => {
 <style scoped>
 .base-detail-page {
   padding: 120px 0 80px;
-  /* Eliminamos min-height: 100vh para que la página fluya de forma natural con el contenido y no fuerce saltos de altura */
   background-color: var(--background);
   transform: translateZ(0);
   -webkit-font-smoothing: antialiased;

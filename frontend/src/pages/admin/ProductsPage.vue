@@ -16,6 +16,7 @@ import EmptyProducts from '../../components/admin/products/EmptyProducts.vue'
 import CreateProductModal from '../../components/admin/products/CreateProductModal.vue'
 import CategoryForm from '../../components/admin/products/CategoryForm.vue'
 import DeleteConfirmModal from '../../components/admin/common/DeleteConfirmModal.vue'
+import AdminNav from '../../components/admin/common/AdminNav.vue'
 
 import type { ProductForm } from '../../composables/useProductModal'
 
@@ -323,6 +324,10 @@ const saveCategory =
 <template>
 
 <section class="products-page">
+
+  <!-- NAV -->
+
+  <AdminNav />
 
 
   <!-- ================================= -->
