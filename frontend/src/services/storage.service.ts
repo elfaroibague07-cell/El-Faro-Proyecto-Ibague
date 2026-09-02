@@ -1,5 +1,3 @@
-import { uploadService } from './upload.service'
-
 class StorageService {
   /**
    * Sube una imagen para la sección de productos -> el-faro/products
@@ -15,9 +13,20 @@ class StorageService {
     return await uploadService.uploadImage(file, 'el-faro/bases')
   }
 
+  /**
+   * Método que faltaba y causaba el TypeError: ir.deleteProductImage is not a function
+   */
+  async deleteProductImage(imageUrl: string): Promise<void> {
+    await this.deleteImage(imageUrl)
+  }
+
+  async deleteBaseImage(imageUrl: string): Promise<void> {
+    await this.deleteImage(imageUrl)
+  }
+
   async deleteImage(_imageUrl: string): Promise<void> {
-    // Las eliminaciones en Cloudinary requieren credenciales backend privadas (Signatures).
-    // Se deja vacío para evitar errores en cliente con subidas unsigned.
+    // Las eliminaciones directas desde el cliente en Cloudinary requieren API Secret,
+    // por lo que se omite o se maneja vía backend si es necesario.
   }
 
   async replaceProductImage(_oldImage: string, newFile: File): Promise<string> {
