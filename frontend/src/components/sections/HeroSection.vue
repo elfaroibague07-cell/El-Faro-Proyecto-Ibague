@@ -20,14 +20,19 @@ const store = useProductStore()
 PRODUCTOS
 ======================================*/
 
+/*======================================
+PRODUCTOS
+======================================*/
+
 const heroProducts = computed(() => {
+  // Primero intentamos usar los destacados, si no hay, usamos la lista general de productos
+  const sourceList = store.featuredProducts.length > 0 
+    ? store.featuredProducts 
+    : store.products
 
-  return store.featuredProducts
-
+  return sourceList
     .filter(product => product.image_url)
-
     .slice(0, 4)
-
 })
 
 
