@@ -24,7 +24,16 @@ class StorageService {
     }
 
     const data = await response.json()
-    return data.secure_url
+    
+    // data.secure_url tiene un formato como:
+    // https://res.cloudinary.com/cloud_name/image/upload/v123456789/el-faro/products/imagen.jpg
+    
+    const originalUrl: string = data.secure_url
+    
+    // Inyectamos f_auto (formato automático WebP/AVIF) y q_auto (calidad adaptativa)
+    const optimizedUrl = originalUrl.replace('/upload/', '/upload/f_auto,q_auto/')
+
+    return optimizedUrl
   }
 
   /**
