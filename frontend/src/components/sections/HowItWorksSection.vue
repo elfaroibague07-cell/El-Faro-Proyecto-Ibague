@@ -84,7 +84,7 @@ Realizamos el grabado con tecnología de alta precisión para obtener el mejor r
 
 <h3>
 
-3. Recibe tu esfera
+3. Recibe tu cristal
 
 </h3>
 

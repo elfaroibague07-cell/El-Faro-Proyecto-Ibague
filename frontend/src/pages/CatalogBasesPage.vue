@@ -21,7 +21,7 @@ onMounted(async () => {
       </h1>
       <p class="subtitle">
         Descubre nuestras bases y encuentra el complemento
-        perfecto para tu esfera de cristal.
+        perfecto para tu cristal.
       </p>
     </section>
 

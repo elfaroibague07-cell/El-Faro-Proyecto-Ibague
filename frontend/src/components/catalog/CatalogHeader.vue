@@ -31,7 +31,7 @@ import PrimaryButton from '../buttons/PrimaryButton.vue'
     ====================================== -->
 
     <h2>
-      Descubre nuestras esferas
+      Descubre nuestros cristales
     </h2>
 
 
@@ -41,7 +41,7 @@ import PrimaryButton from '../buttons/PrimaryButton.vue'
 
     <p>
 
-      Cada esfera de El Faro es grabada con
+      Cada cristal de El Faro es grabada con
       precisión para conservar momentos únicos
       en cristal.
 
@@ -63,7 +63,7 @@ import PrimaryButton from '../buttons/PrimaryButton.vue'
         href="https://wa.me/message/CUNW7BLC4EKKP1"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Solicitar información sobre las esferas de El Faro por WhatsApp"
+        aria-label="Solicitar información sobre los cristales de El Faro por WhatsApp"
       >
 
         Solicitar información
