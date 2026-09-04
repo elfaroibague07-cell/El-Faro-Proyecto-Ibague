@@ -24,11 +24,12 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 60px 20px;
-  background: rgba(18, 18, 18, 0.4);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  gap: 12px;
+  padding: 80px 20px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  gap: 16px;
+  backdrop-filter: blur(20px);
 }
 
 .empty-icon-wrapper {
@@ -40,22 +41,24 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 4px;
 }
 
 .empty-title {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #ffffff;
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .empty-subtitle {
-  font-size: 0.9rem;
-  color: #9ca3af;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
   max-width: 380px;
   margin: 0 0 16px 0;
+  line-height: 1.5;
 }
 
 .btn-primary {
@@ -63,18 +66,19 @@ defineEmits<{
   align-items: center;
   gap: 8px;
   background-color: #ffffff;
-  color: #0b0b0b;
+  color: #000000;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: #e5e7eb;
+  background-color: #e0e0e0;
   transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.15);
 }
 </style>

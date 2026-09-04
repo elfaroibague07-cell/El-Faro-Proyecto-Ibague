@@ -96,7 +96,7 @@ border-radius:14px;
 
 background:var(--primary);
 
-color:#fff;
+color:black;
 
 font-weight:600;
 

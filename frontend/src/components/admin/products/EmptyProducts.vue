@@ -105,7 +105,7 @@ border-radius:14px;
 
 background:var(--primary);
 
-color:white;
+color:black;
 
 cursor:pointer;
 

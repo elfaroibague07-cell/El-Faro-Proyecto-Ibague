@@ -1,12 +1,6 @@
 <script setup lang="ts">
-
-import {
-  ref,
-  onMounted
-} from 'vue'
-
+import { ref, onMounted } from 'vue'
 import type { Product } from '../../types/product'
-
 import { useProductStore } from '../../stores/product.store'
 import { useCategoryStore } from '../../stores/category.store'
 
@@ -20,686 +14,264 @@ import AdminNav from '../../components/admin/common/AdminNav.vue'
 
 import type { ProductForm } from '../../composables/useProductModal'
 
+const store = useProductStore()
+const categoryStore = useCategoryStore()
 
-/*================================*/
-/* STORES */
-/*================================*/
-
-const store =
-  useProductStore()
-
-const categoryStore =
-  useCategoryStore()
-
-
-/*================================*/
-/* PRODUCTOS */
-/*================================*/
-
-const openDeleteModal =
-  ref(false)
-
-const productToDelete =
-  ref<Product | null>(null)
-
-const openCreateModal =
-  ref(false)
-
-const selectedProduct =
-  ref<Product | null>(null)
-
-
-/*================================*/
-/* CATEGORÍAS */
-/*================================*/
-
-const openCategoryModal =
-  ref(false)
-
-
-/*================================*/
-/* CARGAR DATOS */
-/*================================*/
+const openDeleteModal = ref(false)
+const productToDelete = ref<Product | null>(null)
+const openCreateModal = ref(false)
+const selectedProduct = ref<Product | null>(null)
+const openCategoryModal = ref(false)
+const deleting = ref(false)
 
 onMounted(async () => {
-
   await Promise.all([
-
     store.loadProducts(),
-
     categoryStore.loadCategories()
-
   ])
-
 })
 
-
-/*================================*/
-/* CREAR PRODUCTO */
-/*================================*/
-
 const openProductModal = () => {
-
-  selectedProduct.value =
-    null
-
-  openCreateModal.value =
-    true
-
+  selectedProduct.value = null
+  openCreateModal.value = true
 }
 
-
-/*================================*/
-/* EDITAR PRODUCTO */
-/*================================*/
-
-const editProduct = (
-  product: Product
-) => {
-
-  selectedProduct.value =
-    product
-
-  openCreateModal.value =
-    true
-
+const editProduct = (product: Product) => {
+  selectedProduct.value = product
+  openCreateModal.value = true
 }
-
-
-/*================================*/
-/* CERRAR PRODUCTO */
-/*================================*/
 
 const closeProductModal = () => {
-
-  openCreateModal.value =
-    false
-
-  selectedProduct.value =
-    null
-
+  openCreateModal.value = false
+  selectedProduct.value = null
 }
 
-
-/*================================*/
-/* GUARDAR PRODUCTO */
-/*================================*/
-
-const saveProduct = async (
-  product: ProductForm
-) => {
-
+const saveProduct = async (product: ProductForm) => {
   try {
-
-    if (
-      selectedProduct.value
-    ) {
-
-      await store.updateProduct(
-
-        selectedProduct.value.id,
-
-        product
-
-      )
-
+    if (selectedProduct.value) {
+      await store.updateProduct(selectedProduct.value.id, product)
+    } else {
+      await store.createProduct(product)
     }
-
-    else {
-
-      await store.createProduct(
-
-        product
-
-      )
-
-    }
-
-    /*
-     * Recargamos categorías
-     * por si el producto quedó
-     * relacionado con alguna.
-     */
-
     await categoryStore.loadCategories()
-
     closeProductModal()
-
+  } catch (error) {
+    console.error('Error guardando producto:', error)
   }
-
-  catch (error) {
-
-    console.error(
-
-      'Error guardando producto:',
-
-      error
-
-    )
-
-  }
-
 }
 
-
-/*================================*/
-/* ELIMINAR PRODUCTO */
-/*================================*/
-
-const deleteProduct = (
-  product: Product
-) => {
-
-  productToDelete.value =
-    product
-
-  openDeleteModal.value =
-    true
-
+const deleteProduct = (product: Product) => {
+  productToDelete.value = product
+  openDeleteModal.value = true
 }
 
-
-/*================================*/
-/* CONFIRMAR ELIMINACIÓN */
-/*================================*/
-
-const deleting =
-  ref(false)
-
-
-const confirmDelete =
-  async () => {
-
-    if (
-      !productToDelete.value
-    ) {
-
-      return
-
-    }
-
-
-    deleting.value =
-      true
-
-
-    try {
-
-      await store.deleteProduct(
-
-        productToDelete.value.id,
-
-        productToDelete.value.image_url
-
-      )
-
-
-      openDeleteModal.value =
-        false
-
-      productToDelete.value =
-        null
-
-    }
-
-    catch (error) {
-
-      console.error(
-
-        'Error eliminando producto:',
-
-        error
-
-      )
-
-    }
-
-    finally {
-
-      deleting.value =
-        false
-
-    }
-
+const confirmDelete = async () => {
+  if (!productToDelete.value) return
+  deleting.value = true
+  try {
+    await store.deleteProduct(productToDelete.value.id, productToDelete.value.image_url)
+    openDeleteModal.value = false
+    productToDelete.value = null
+  } catch (error) {
+    console.error('Error eliminando producto:', error)
+  } finally {
+    deleting.value = false
   }
+}
 
+const openCategoryForm = () => {
+  openCategoryModal.value = true
+}
 
-/*================================*/
-/* ABRIR CATEGORÍAS */
-/*================================*/
+const closeCategoryForm = () => {
+  openCategoryModal.value = false
+  categoryStore.loadCategories()
+}
 
-const openCategoryForm =
-  () => {
-
-    openCategoryModal.value =
-      true
-
-  }
-
-
-/*================================*/
-/* CERRAR CATEGORÍAS */
-/*================================*/
-
-const closeCategoryForm =
-  () => {
-
-    openCategoryModal.value =
-      false
-
-    /*
-     * Actualizamos el store
-     * porque CategoryForm trabaja
-     * directamente con CategoryService.
-     */
-
-    categoryStore.loadCategories()
-
-  }
-
-
-/*================================*/
-/* CATEGORÍA CREADA */
-/*================================*/
-
-const saveCategory =
-  async () => {
-
-    /*
-     * CategoryForm ya crea
-     * directamente mediante
-     * CategoryService.
-     *
-     * Aquí solamente sincronizamos
-     * el store del padre.
-     */
-
-    await categoryStore.loadCategories()
-
-  }
-
+const saveCategory = async () => {
+  await categoryStore.loadCategories()
+}
 </script>
 
-
 <template>
-
-<section class="products-page">
-
-  <!-- NAV -->
-
+<div class="admin-wrapper">
   <AdminNav />
 
+  <section class="products-page">
+    <div class="content-container">
+      <ProductsHeader @create="openProductModal" />
 
-  <!-- ================================= -->
-  <!-- HEADER -->
-  <!-- ================================= -->
+      <div class="management-actions">
+        <div class="management-info">
+          <div class="info-text">
+            <span class="management-label">✦ GESTIÓN DE CATEGORÍAS</span>
+            <span class="management-count">
+              {{ categoryStore.categories.length }} categorías registradas
+            </span>
+          </div>
 
-  <ProductsHeader
-    @create="openProductModal"
-  />
-
-
-  <!-- ================================= -->
-  <!-- ACCIONES -->
-  <!-- ================================= -->
-
-  <div class="management-actions">
-
-
-    <!-- ================================= -->
-    <!-- CATEGORÍAS -->
-    <!-- ================================= -->
-
-    <div class="management-info">
-
-
-      <div>
-
-        <span class="management-label">
-
-          CATEGORÍAS
-
-        </span>
-
-
-        <span class="management-count">
-
-          {{ categoryStore.categories.length }}
-
-          categorías creadas
-
-        </span>
-
+          <button
+            type="button"
+            class="category-button"
+            @click="openCategoryForm"
+          >
+            <span class="category-icon">+</span>
+            <span>Gestionar categorías</span>
+          </button>
+        </div>
       </div>
 
+      <div class="table-container">
+        <ProductsTable
+          v-if="store.products.length"
+          :products="store.products"
+          @edit="editProduct"
+          @delete="deleteProduct"
+        />
 
-      <button
-
-        type="button"
-
-        class="category-button"
-
-        @click="openCategoryForm"
-
-      >
-
-        <span class="category-icon">
-
-          +
-
-        </span>
-
-
-        Gestionar categorías
-
-      </button>
-
-
+        <EmptyProducts
+          v-else-if="!store.loading"
+          @create="openProductModal"
+        />
+      </div>
     </div>
 
+    <CreateProductModal
+      :key="selectedProduct?.id ?? 'new'"
+      :open="openCreateModal"
+      :product="selectedProduct"
+      :categories="categoryStore.categories"
+      @close="closeProductModal"
+      @save="saveProduct"
+    />
 
-  </div>
+    <CategoryForm
+      :open="openCategoryModal"
+      @close="closeCategoryForm"
+      @save="saveCategory"
+    />
 
-
-  <!-- ================================= -->
-  <!-- PRODUCTOS -->
-  <!-- ================================= -->
-
-  <ProductsTable
-
-    v-if="store.products.length"
-
-    :products="store.products"
-
-    @edit="editProduct"
-
-    @delete="deleteProduct"
-
-  />
-
-
-  <!-- ================================= -->
-  <!-- SIN PRODUCTOS -->
-  <!-- ================================= -->
-
-  <EmptyProducts
-
-    v-else-if="!store.loading"
-
-    @create="openProductModal"
-
-  />
-
-
-  <!-- ================================= -->
-  <!-- MODAL PRODUCTO -->
-  <!-- ================================= -->
-
-  <CreateProductModal
-
-    :key="
-      selectedProduct?.id ?? 'new'
-    "
-
-    :open="openCreateModal"
-
-    :product="selectedProduct"
-
-    :categories="
-      categoryStore.categories
-    "
-
-    @close="closeProductModal"
-
-    @save="saveProduct"
-
-  />
-
-
-  <!-- ================================= -->
-  <!-- MODAL CATEGORÍAS -->
-  <!-- ================================= -->
-
-  <CategoryForm
-
-    :open="openCategoryModal"
-
-    @close="closeCategoryForm"
-
-    @save="saveCategory"
-
-  />
-
-
-  <!-- ================================= -->
-  <!-- MODAL ELIMINAR PRODUCTO -->
-  <!-- ================================= -->
-
-  <DeleteConfirmModal
-
-    :open="openDeleteModal"
-
-    :title="
-      productToDelete?.name || ''
-    "
-
-    :loading="deleting"
-
-    @close="
-      openDeleteModal = false
-    "
-
-    @confirm="confirmDelete"
-
-  />
-
-
-</section>
-
+    <DeleteConfirmModal
+      :open="openDeleteModal"
+      :title="productToDelete?.name || ''"
+      :loading="deleting"
+      @close="openDeleteModal = false"
+      @confirm="confirmDelete"
+    />
+  </section>
+</div>
 </template>
 
-
 <style scoped>
-
-/*================================*/
-/* PÁGINA */
-/*================================*/
+.admin-wrapper {
+  min-height: 100vh;
+  background: #060606;
+  color: #ffffff;
+}
 
 .products-page {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:24px;
-
+  display: flex;
+  flex-direction: column;
+  padding: 40px 0 60px 0;
 }
 
-
-/*================================*/
-/* ACCIONES */
-/*================================*/
+.content-container {
+  width: min(1280px, 92%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
 .management-actions {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:16px;
-
+  display: flex;
+  flex-direction: column;
 }
-
-
-/*================================*/
-/* INFORMACIÓN CATEGORÍAS */
-/*================================*/
 
 .management-info {
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:20px;
-
-  padding:
-    18px
-    20px;
-
-  background:
-    var(--surface);
-
-  border:
-    1px solid
-    var(--border);
-
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 28px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-
-/*================================*/
-/* TEXTO */
-/*================================*/
-
-.management-info > div:first-child {
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:5px;
-
+.info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-
 
 .management-label {
-
-  color:
-    var(--primary);
-
-  font-size:10px;
-
-  font-weight:600;
-
-  letter-spacing:.16em;
-
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
 }
-
 
 .management-count {
-
-  color:
-    var(--text-secondary);
-
-  font-size:13px;
-
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
 }
-
-
-/*================================*/
-/* BOTÓN CATEGORÍAS */
-/*================================*/
 
 .category-button {
-
-  display:inline-flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:8px;
-
-  padding:
-    11px
-    18px;
-
-  border:
-    1px solid
-    var(--primary);
-
-  background:
-    transparent;
-
-  color:
-    var(--primary);
-
-  font-family:inherit;
-
-  font-size:13px;
-
-  font-weight:600;
-
-  cursor:pointer;
-
-  transition:
-    background .2s ease,
-    color .2s ease,
-    transform .2s ease;
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-
 
 .category-button:hover {
-
-  background:
-    var(--primary);
-
-  color:
-    #070707;
-
-  transform:
-    translateY(-1px);
-
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.15);
 }
-
-
-/*================================*/
-/* ICONO */
-/*================================*/
 
 .category-icon {
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:center;
-
-  width:18px;
-
-  height:18px;
-
-  font-size:18px;
-
-  line-height:1;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
+.table-container {
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
 
-/*================================*/
-/* MÓVIL */
-/*================================*/
-
-@media(max-width:600px) {
-
+@media (max-width: 600px) {
   .management-info {
-
-    align-items:flex-start;
-
-    flex-direction:column;
-
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
   }
-
 
   .category-button {
-
-    width:100%;
-
+    width: 100%;
   }
-
 }
-
 </style>
