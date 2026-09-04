@@ -13,7 +13,7 @@ defineEmits<{
 
 <template>
   <div class="table-container">
-    <table class="admin-table">
+    <table>
       <thead>
         <tr>
           <th>Imagen</th>
@@ -56,6 +56,14 @@ defineEmits<{
             </div>
           </td>
         </tr>
+
+        <tr v-if="!bases.length">
+          <td colspan="6" class="empty">
+            <div class="empty-state">
+              <p>No hay bases registradas en este momento.</p>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -63,55 +71,61 @@ defineEmits<{
 
 <style scoped>
 .table-container {
-  background: rgba(18, 18, 18, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  background: rgba(18, 18, 18, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow-x: auto;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-.admin-table {
+table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
+  min-width: 900px;
 }
 
-.admin-table th {
+thead {
   background: rgba(255, 255, 255, 0.02);
-  padding: 16px 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #9ca3af;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.admin-table td {
-  padding: 16px 20px;
+th {
+  padding: 18px 24px;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+td {
+  padding: 18px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   vertical-align: middle;
 }
 
-.admin-table tbody tr {
+tbody tr {
   transition: background-color 0.2s ease;
 }
 
-.admin-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.015);
+tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
-.admin-table tbody tr:last-child td {
+tbody tr:last-child td {
   border-bottom: none;
 }
 
 .img-wrapper {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .img-wrapper img {
@@ -129,17 +143,17 @@ defineEmits<{
 
 .product-slug {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .price-text {
   font-weight: 600;
-  color: #e5e7eb;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .badge {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -162,7 +176,7 @@ defineEmits<{
 }
 
 .dash-icon {
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .text-right {
@@ -176,32 +190,52 @@ defineEmits<{
 }
 
 .btn-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .btn-icon.edit {
-  background-color: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
 }
 
 .btn-icon.edit:hover {
-  background-color: rgba(59, 130, 246, 0.3);
+  background-color: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .btn-icon.delete {
-  background-color: rgba(239, 68, 68, 0.15);
   color: #f87171;
 }
 
 .btn-icon.delete:hover {
-  background-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.empty {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.empty-state p {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.95rem;
+  margin: 0;
 }
 </style>

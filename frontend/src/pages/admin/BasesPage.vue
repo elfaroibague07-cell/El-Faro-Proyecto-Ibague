@@ -67,23 +67,24 @@ const saveBase = async (baseData: any) => {
 </script>
 
 <template>
-  <section class="bases-page">
-    
+  <main class="admin-layout">
     <AdminNav />
 
-    <BasesHeader @create="openBaseModal" />
+    <div class="content-container">
+      <BasesHeader @create="openBaseModal" />
 
-    <BasesTable
-      v-if="baseStore.bases.length"
-      :bases="baseStore.bases"
-      @edit="editBase"
-      @delete="deleteBase"
-    />
+      <BasesTable
+        v-if="baseStore.bases.length"
+        :bases="baseStore.bases"
+        @edit="editBase"
+        @delete="deleteBase"
+      />
 
-    <EmptyBases
-      v-else-if="!baseStore.loading"
-      @create="openBaseModal"
-    />
+      <EmptyBases
+        v-else-if="!baseStore.loading"
+        @create="openBaseModal"
+      />
+    </div>
 
     <CreateBaseModal
       :key="selectedBase?.id ?? 'new'"
@@ -100,13 +101,23 @@ const saveBase = async (baseData: any) => {
       @close="openDeleteModal = false"
       @confirm="confirmDelete"
     />
-  </section>
+  </main>
 </template>
 
 <style scoped>
-.bases-page {
+.admin-layout {
+  min-height: 100vh;
+  background-color: #0b0b0b;
+  color: #ffffff;
+  padding-bottom: 60px;
+}
+
+.content-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 </style>
